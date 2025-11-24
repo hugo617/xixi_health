@@ -32,9 +32,10 @@
             min-height: 100vh;
             display: flex;
             justify-content: center;
-            align-items: flex-start; /* 顶部对齐 */
-            padding-top: 100px; /* 给熊猫留出头部空间 */
+            align-items: flex-start;
+            padding-top: 100px;
             padding-bottom: 50px;
+            margin: 0;
             
             /* MyShell 标志性的点阵背景纹理 */
             background-image: 
@@ -488,14 +489,37 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             renderTable(currentData);
+            
+            // 添加页面可见性检测，确保页面切换时重新渲染
+            document.addEventListener('visibilitychange', function() {
+                if (!document.hidden && typeof renderTable === 'function') {
+                    setTimeout(() => {
+                        renderTable(currentData);
+                    }, 50);
+                }
+            });
+            
+            // 添加窗口聚焦检测，确保从其他标签页切换回来时重新渲染
+            window.addEventListener('focus', function() {
+                if (typeof renderTable === 'function') {
+                    setTimeout(() => {
+                        renderTable(currentData);
+                    }, 50);
+                }
+            });
         });
 
         // 渲染表格
         function renderTable(data) {
             const tbody = document.getElementById('tableBody');
+            if (!tbody) {
+                console.error('表格主体未找到');
+                return;
+            }
+            
             tbody.innerHTML = '';
 
-            if (data.length === 0) {
+            if (!data || data.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding: 40px; color: #999;">🔍 未找到匹配的用户</td></tr>';
                 return;
             }

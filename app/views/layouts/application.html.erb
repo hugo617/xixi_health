@@ -18,6 +18,10 @@
   </head>
 
   <body>
+  <% if show_sidenav? %>
+      <%= render :partial => "/layouts/sidenav" %>
+    <% end %>
+    
     <%= yield %>
   </body>
 </html>

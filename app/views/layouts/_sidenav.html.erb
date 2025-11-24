@@ -1,0 +1,383 @@
+<!-- 触发按钮：改为悬浮的玻璃卡片样式 -->
+<div class="menu-trigger" onclick="openNav()">
+    <span class="trigger-icon">&#9776;</span>
+</div>
+
+<!-- 侧边栏结构 -->
+<div id="mySidenav" class="sidenav">
+    <!-- 装饰背景 -->
+    <div class="sidenav-bg-decor"></div>
+
+    <div class="sidenav-header">
+        <div class="brand">
+            <span class="brand-logo">💊</span> 烯晞健康
+        </div>
+        <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+    </div>
+
+    <div class="sidenav-content">
+        <div class="nav-group-title">管理中心</div>
+        
+        <a href="users" class="sidenav-item" onclick="handleNavigation('users'); return false;">
+            <span class="icon">👥</span>
+            <span class="text">用户列表</span>
+            <span class="arrow">→</span>
+        </a>
+        
+        <a href="reports" class="sidenav-item" onclick="handleNavigation('reports'); return false;">
+            <span class="icon">📊</span>
+            <span class="text">健康报告</span>
+            <span class="arrow">→</span>
+        </a>
+
+        <!-- 示例：增加更多占位，显得丰富 -->
+        <a href="#" class="sidenav-item disabled">
+            <span class="icon">⚙️</span>
+            <span class="text">系统设置</span>
+        </a>
+    </div>
+    
+    <!-- 底部装饰 -->
+    <div class="sidenav-footer">
+        Digital Health Passport
+    </div>
+</div>
+
+<script>
+  // 保持原有逻辑不变
+  function openNav() {
+      document.getElementById("mySidenav").style.width = "280px"; //稍微加宽一点更美观
+  }
+
+  function closeNav() {
+      document.getElementById("mySidenav").style.width = "0";
+  }
+
+  // 添加导航处理函数
+  function handleNavigation(path) {
+      closeNav();
+      
+      // 获取当前路径
+      const currentPath = window.location.pathname;
+      const targetPath = '/' + path;
+      
+      // 如果已经在目标页面，强制重新渲染数据
+      if (currentPath === targetPath) {
+          // 强制重新渲染表格数据
+          if (typeof renderTable === 'function' && typeof currentData !== 'undefined') {
+              renderTable(currentData);
+          } else {
+              // 如果渲染函数不可用，强制刷新页面
+              window.location.reload(true);
+          }
+          return;
+      }
+      
+      // 导航到新页面，使用强制刷新避免缓存
+      window.location.href = targetPath + '?t=' + Date.now();
+  }
+
+  // 确保页面加载时数据正确渲染
+  document.addEventListener('DOMContentLoaded', function() {
+      // 检查当前页面并触发相应的渲染函数
+      const currentPath = window.location.pathname;
+      
+      // 延迟执行，确保页面上的其他脚本已经加载完成
+      setTimeout(function() {
+          if (currentPath.includes('users')) {
+              // 用户页面数据渲染
+              if (typeof renderTable === 'function' && typeof currentData !== 'undefined') {
+                  renderTable(currentData);
+                  console.log('用户页面数据已重新渲染');
+              }
+          } else if (currentPath.includes('reports')) {
+              // 报告页面数据渲染  
+              if (typeof renderTable === 'function' && typeof currentData !== 'undefined') {
+                  renderTable(currentData);
+                  console.log('报告页面数据已重新渲染');
+              }
+          }
+      }, 100); // 100ms 延迟
+  });
+
+  // 监听页面加载完成事件，确保数据渲染
+  window.addEventListener('load', function() {
+      setTimeout(function() {
+          const currentPath = window.location.pathname;
+          if (currentPath.includes('users') || currentPath.includes('reports')) {
+              if (typeof renderTable === 'function' && typeof currentData !== 'undefined') {
+                  renderTable(currentData);
+              }
+          }
+      }, 200);
+  });
+
+  // 监听历史记录变化（当用户通过浏览器前进/后退时）
+  window.addEventListener('popstate', function() {
+      setTimeout(function() {
+          const currentPath = window.location.pathname;
+          if (currentPath.includes('users') || currentPath.includes('reports')) {
+              if (typeof renderTable === 'function' && typeof currentData !== 'undefined') {
+                  renderTable(currentData);
+              }
+          }
+      }, 100);
+  });
+
+  // 使用 MutationObserver 监听 DOM 变化，确保数据渲染
+  if (typeof MutationObserver !== 'undefined') {
+      const observer = new MutationObserver(function(mutations) {
+          const currentPath = window.location.pathname;
+          if (currentPath.includes('users') || currentPath.includes('reports')) {
+              const tableBody = document.getElementById('tableBody');
+              if (tableBody && tableBody.children.length === 0) {
+                  // 如果表格为空，尝试重新渲染
+                  if (typeof renderTable === 'function' && typeof currentData !== 'undefined') {
+                      renderTable(currentData);
+                  }
+          }
+          }
+      });
+
+      // 开始监听 DOM 变化
+      setTimeout(function() {
+          observer.observe(document.body, {
+              childList: true,
+              subtree: true
+          });
+      }, 1000);
+  }
+
+  // 全局数据刷新函数
+  window.refreshPageData = function() {
+      const currentPath = window.location.pathname;
+      console.log('刷新页面数据，当前路径：', currentPath);
+      
+      if (currentPath.includes('users')) {
+          // 用户页面数据刷新
+          if (typeof users !== 'undefined') {
+              currentData = [...users];
+          }
+          if (typeof renderTable === 'function' && typeof currentData !== 'undefined') {
+              renderTable(currentData);
+              console.log('用户数据已刷新');
+          }
+      } else if (currentPath.includes('reports')) {
+          // 报告页面数据刷新
+          if (typeof reports !== 'undefined') {
+              currentData = [...reports];
+          }
+          if (typeof renderTable === 'function' && typeof currentData !== 'undefined') {
+              renderTable(currentData);
+              console.log('报告数据已刷新');
+          }
+      }
+  };
+
+  // 提供一个手动刷新按钮（调试用）
+  document.addEventListener('keydown', function(e) {
+      // 按 Ctrl+Shift+R 手动刷新数据
+      if (e.ctrlKey && e.shiftKey && e.key === 'R') {
+          e.preventDefault();
+          refreshPageData();
+          alert('页面数据已手动刷新');
+      }
+  });
+</script>
+
+<style>
+    /* 引入字体，保持风格一致 */
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+
+    :root {
+        --primary: #10b981;
+        --primary-light: #d1fae5;
+        --text-main: #1f2937;
+        --text-sub: #6b7280;
+        --glass-bg: rgba(255, 255, 255, 0.9);
+        --glass-border: rgba(255, 255, 255, 0.6);
+    }
+
+    /* --- 触发按钮样式优化 --- */
+    .menu-trigger {
+        position: fixed;
+        top: 20px;
+        left: 20px;
+        z-index: 1002;
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(10px);
+        width: 48px;
+        height: 48px;
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.15);
+        border: 1px solid rgba(255, 255, 255, 0.8);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        color: var(--primary);
+        font-size: 24px;
+    }
+
+    .menu-trigger:hover {
+        transform: scale(1.05);
+        box-shadow: 0 8px 20px rgba(16, 185, 129, 0.25);
+        background: #fff;
+    }
+
+    /* --- 侧边栏容器 --- */
+    .sidenav {
+        height: 100%;
+        width: 0; /* 初始关闭 */
+        position: fixed;
+        z-index: 2000; /* 确保在最上层 */
+        top: 0;
+        left: 0;
+        background: var(--glass-bg);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        overflow-x: hidden;
+        transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 10px 0 30px rgba(0, 0, 0, 0.05);
+        border-right: 1px solid var(--glass-border);
+        display: flex;
+        flex-direction: column;
+        font-family: 'Inter', sans-serif;
+    }
+
+    /* 背景装饰（MyShell 风格的渐变光晕） */
+    .sidenav-bg-decor {
+        position: absolute;
+        top: -10%; left: -50%;
+        width: 200%; height: 50%;
+        background: radial-gradient(circle, rgba(16, 185, 129, 0.08) 0%, transparent 70%);
+        pointer-events: none;
+        z-index: -1;
+    }
+
+    /* --- 头部区域 --- */
+    .sidenav-header {
+        padding: 30px 24px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid rgba(0,0,0,0.03);
+    }
+
+    .brand {
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--text-main);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .closebtn {
+        font-size: 28px;
+        color: var(--text-sub);
+        text-decoration: none;
+        transition: 0.3s;
+        line-height: 1;
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+    }
+
+    .closebtn:hover {
+        color: var(--primary);
+        background: var(--primary-light);
+    }
+
+    /* --- 菜单内容 --- */
+    .sidenav-content {
+        padding: 24px 16px;
+        flex: 1;
+    }
+
+    .nav-group-title {
+        font-size: 12px;
+        color: var(--text-sub);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 12px;
+        padding-left: 12px;
+        font-weight: 600;
+    }
+
+    /* 菜单项样式 */
+    .sidenav-item {
+        display: flex;
+        align-items: center;
+        padding: 14px 16px;
+        margin-bottom: 8px;
+        text-decoration: none;
+        color: var(--text-main);
+        font-size: 15px;
+        font-weight: 500;
+        border-radius: 12px;
+        transition: all 0.2s ease;
+        border: 1px solid transparent;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .sidenav-item .icon {
+        margin-right: 12px;
+        font-size: 18px;
+        width: 24px;
+        text-align: center;
+    }
+
+    .sidenav-item .arrow {
+        margin-left: auto;
+        opacity: 0;
+        transform: translateX(-10px);
+        transition: all 0.3s;
+        font-size: 14px;
+        color: var(--primary);
+    }
+
+    /* 悬停效果：MyShell 风格的浅绿背景 */
+    .sidenav-item:hover {
+        background: #f0fdf4;
+        color: var(--primary);
+        border-color: rgba(16, 185, 129, 0.1);
+        padding-left: 20px; /* 轻微位移 */
+    }
+
+    .sidenav-item:hover .arrow {
+        opacity: 1;
+        transform: translateX(0);
+    }
+
+    /* 禁用状态 */
+    .sidenav-item.disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        filter: grayscale(1);
+    }
+    .sidenav-item.disabled:hover {
+        background: transparent;
+        padding-left: 16px;
+        color: var(--text-main);
+    }
+
+    /* --- 底部装饰 --- */
+    .sidenav-footer {
+        padding: 24px;
+        text-align: center;
+        font-size: 12px;
+        color: #9ca3af;
+        border-top: 1px solid rgba(0,0,0,0.03);
+        background: rgba(255,255,255,0.3);
+    }
+
+    @media screen and (max-height: 450px) {
+        .sidenav {padding-top: 15px;}
+    }
+</style>

@@ -38,6 +38,7 @@
             align-items: flex-start;
             padding-top: 100px;
             padding-bottom: 50px;
+            margin: 0;
 
             /* MyShell 标志性的双层点阵背景 */
             background-image: 
@@ -509,13 +510,38 @@
             '处方单': '💊'
         };
 
-        document.addEventListener('DOMContentLoaded', () => renderTable(currentData));
+        document.addEventListener('DOMContentLoaded', () => {
+            renderTable(currentData);
+            
+            // 添加页面可见性检测，确保页面切换时重新渲染
+            document.addEventListener('visibilitychange', function() {
+                if (!document.hidden && typeof renderTable === 'function') {
+                    setTimeout(() => {
+                        renderTable(currentData);
+                    }, 50);
+                }
+            });
+            
+            // 添加窗口聚焦检测，确保从其他标签页切换回来时重新渲染
+            window.addEventListener('focus', function() {
+                if (typeof renderTable === 'function') {
+                    setTimeout(() => {
+                        renderTable(currentData);
+                    }, 50);
+                }
+            });
+        });
 
         function renderTable(data) {
             const tbody = document.getElementById('tableBody');
+            if (!tbody) {
+                console.error('表格主体未找到');
+                return;
+            }
+            
             tbody.innerHTML = '';
 
-            if (data.length === 0) {
+            if (!data || data.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:40px; color:#9ca3af;">🍂 暂无匹配报告</td></tr>`;
                 return;
             }
