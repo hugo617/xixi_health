@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>烯晞健康 · 欢迎回来</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        :root {
+            --bg-color: #F5F9F8;
+            --card-bg: #FFFFFF;
+            --primary-green: #059669;
+            --primary-hover: #047857;
+            --text-main: #1F2937;
+            --text-sub: #6B7280;
+            --input-bg: #F3F4F6;
+            --input-focus-border: #059669;
+            --shadow-card: 0 20px 40px -5px rgba(5, 150, 105, 0.1), 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+        }
+
+        body {
+            font-family: 'Inter', 'Noto Sans SC', sans-serif;
+            background-color: var(--bg-color);
+            background-image: 
+                linear-gradient(rgba(5, 150, 105, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(5, 150, 105, 0.05) 1px, transparent 1px);
+            background-size: 40px 40px;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* -----------------------------------------------------------
+           背景调整：增加局部淡黄色
+        ----------------------------------------------------------- */
+        /* 左上角：原有的绿色光晕 */
+        body::before {
+            content: ''; position: absolute; width: 80vw; height: 80vw;
+            background: radial-gradient(circle, rgba(52, 211, 153, 0.12) 0%, transparent 70%);
+            top: -20%; left: -10%; 
+            animation: floatLight 15s infinite ease-in-out; 
+            z-index: 0;
+        }
+
+        /* 右下角：新增暖黄色光晕 */
+        body::after {
+            content: ''; position: absolute; width: 70vw; height: 70vw;
+            /* 柔和的琥珀黄/淡黄色 */
+            background: radial-gradient(circle, rgba(251, 191, 36, 0.15) 0%, transparent 65%);
+            bottom: -15%; right: -15%; 
+            animation: floatLight 20s infinite ease-in-out reverse; 
+            z-index: 0;
+        }
+
+        @keyframes floatLight {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(20px, 20px) scale(1.1); }
+        }
+
+        /* -----------------------------------------------------------
+           闪电图标样式
+        ----------------------------------------------------------- */
+        .lightning-wrapper {
+            position: absolute;
+            top: 25%; left: 15%; width: 80px; height: 100px; z-index: 10;
+            animation: floatMove 6s ease-in-out infinite, shakeWobble 3s ease-in-out infinite;
+        }
+        .lightning-svg {
+            width: 100%; height: 100%;
+            filter: drop-shadow(0 10px 15px rgba(245, 158, 11, 0.3));
+        }
+        @keyframes floatMove {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+        @keyframes shakeWobble {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(5deg); }
+            75% { transform: rotate(-5deg); }
+        }
+
+        /* -----------------------------------------------------------
+           熊猫样式
+        ----------------------------------------------------------- */
+        .mascot-wrapper {
+            position: absolute;
+            top: -100px; left: 50%; transform: translateX(-50%);
+            width: 160px; height: 120px; z-index: 5; pointer-events: none;
+        }
+        .panda-svg {
+            width: 100%; height: 100%; animation: pandaFloat 4s ease-in-out infinite;
+            filter: drop-shadow(0 5px 10px rgba(0,0,0,0.1));
+        }
+        @keyframes pandaFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-3px); }
+        }
+        .eye-blink { animation: blink 4s infinite; transform-origin: center; }
+        @keyframes blink {
+            0%, 48%, 52%, 100% { transform: scaleY(1); }
+            50% { transform: scaleY(0.1); }
+        }
+
+        /* -----------------------------------------------------------
+           卡片容器
+        ----------------------------------------------------------- */
+        .login-container {
+            width: 420px;
+            background: var(--card-bg);
+            border-radius: 32px;
+            padding: 50px 40px 40px 40px;
+            position: relative;
+            box-shadow: var(--shadow-card);
+            z-index: 2;
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            margin-top: 60px; 
+        }
+
+        .header-section { text-align: center; margin-bottom: 32px; }
+        .logo-text {
+            font-size: 24px; font-weight: 700; color: var(--text-main); margin-bottom: 8px;
+            background: linear-gradient(135deg, var(--primary-green) 0%, #34D399 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .sub-text { font-size: 14px; color: var(--text-sub); }
+
+        .login-tabs {
+            display: flex; padding: 4px; background: #F1F5F9;
+            border-radius: 16px; margin-bottom: 30px;
+        }
+        .tab {
+            flex: 1; padding: 10px; cursor: pointer; color: var(--text-sub);
+            font-size: 14px; font-weight: 500; border: none; background: transparent;
+            border-radius: 12px; transition: all 0.3s;
+        }
+        .tab.active {
+            color: var(--primary-green); font-weight: 600; background: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+
+        .form-group { margin-bottom: 20px; position: relative; }
+        
+        .input-wrapper {
+            display: flex; align-items: center; background: var(--input-bg);
+            border-radius: 16px; border: 2px solid transparent; transition: all 0.3s;
+        }
+        .input-wrapper:focus-within {
+            background: white; border-color: var(--input-focus-border);
+            box-shadow: 0 0 0 4px rgba(5, 150, 105, 0.1);
+        }
+
+        .prefix-icon { padding-left: 16px; font-size: 18px; color: var(--text-sub); }
+        .country-code {
+            padding: 16px 12px 16px 16px; font-weight: 600; color: var(--text-main);
+            font-size: 15px; border-right: 1px solid rgba(0,0,0,0.05);
+        }
+        .custom-input {
+            flex: 1; padding: 16px; border: none; background: transparent;
+            font-size: 15px; color: var(--text-main); outline: none; width: 100%;
+        }
+
+        .code-group { display: flex; gap: 12px; }
+        .verify-btn {
+            padding: 0 20px; background: rgba(5, 150, 105, 0.1); color: var(--primary-green);
+            border: none; border-radius: 16px; font-size: 13px; font-weight: 600;
+            cursor: pointer; transition: all 0.3s; white-space: nowrap;
+        }
+        .verify-btn:hover:not(:disabled) { background: rgba(5, 150, 105, 0.15); }
+
+        .submit-btn {
+            width: 100%; padding: 16px; background: var(--primary-green); color: white;
+            border: none; border-radius: 16px; font-size: 16px; font-weight: 600;
+            cursor: pointer; transition: all 0.3s; margin-top: 10px;
+            box-shadow: 0 4px 12px rgba(5, 150, 105, 0.2); position: relative; overflow: hidden;
+        }
+        .submit-btn:hover {
+            background: var(--primary-hover); transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(5, 150, 105, 0.3);
+        }
+
+        .form-container { display: none; animation: slideUpFade 0.4s ease; }
+        .form-container.active { display: block; }
+        @keyframes slideUpFade { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .footer-agreement { margin-top: 24px; font-size: 12px; color: #9CA3AF; text-align: center; }
+        .footer-agreement a { color: var(--primary-green); text-decoration: none; }
+        .error-text { color: #EF4444; font-size: 12px; margin-top: 6px; padding-left: 4px; display: none; }
+        
+        /* 眼睛图标样式 */
+        .toggle-eye { 
+            padding: 0 16px; cursor: pointer; color: #9CA3AF; 
+            font-size: 18px; user-select: none;
+            transition: color 0.3s;
+        }
+        .toggle-eye:hover { color: var(--primary-green); }
+
+        @media (max-width: 800px) {
+            .lightning-wrapper { width: 60px; height: 80px; top: 10%; left: 5%; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 黄色闪电图标 -->
+    <div class="lightning-wrapper">
+        <svg class="lightning-svg" viewBox="0 0 100 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <linearGradient id="lightningGrad" x1="0" y1="0" x2="100" y2="120" gradientUnits="userSpaceOnUse">
+                    <stop offset="0%" stop-color="#FFF7ED"/> 
+                    <stop offset="30%" stop-color="#FCD34D"/> 
+                    <stop offset="100%" stop-color="#F59E0B"/> 
+                </linearGradient>
+            </defs>
+            <path d="M55 2 L15 60 L45 60 L35 118 L85 45 L55 45 L55 2 Z" fill="url(#lightningGrad)" stroke="#F59E0B" stroke-width="2" stroke-linejoin="round"/>
+            <path d="M55 10 L28 55 L48 55 L42 90 L70 45 L55 45 L55 10 Z" fill="rgba(255,255,255,0.4)"/>
+        </svg>
+    </div>
+
+    <div class="login-container">
+        
+        <!-- 熊猫吉祥物 -->
+        <div class="mascot-wrapper">
+            <svg class="panda-svg" viewBox="0 0 200 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <g transform="translate(0, 10)">
+                    <circle cx="40" cy="50" r="22" fill="#1F2937"/>
+                    <circle cx="160" cy="50" r="22" fill="#1F2937"/>
+                    <ellipse cx="100" cy="90" rx="75" ry="60" fill="#FFFFFF" stroke="#E5E7EB" stroke-width="2"/>
+                    <ellipse cx="65" cy="85" rx="20" ry="24" fill="#1F2937" transform="rotate(-15 65 85)"/>
+                    <ellipse cx="135" cy="85" rx="20" ry="24" fill="#1F2937" transform="rotate(15 135 85)"/>
+                    <g class="eye-blink">
+                        <circle cx="68" cy="82" r="5" fill="white"/>
+                        <circle cx="132" cy="82" r="5" fill="white"/>
+                        <circle cx="70" cy="80" r="2" fill="#FFFFFF" opacity="0.9"/>
+                        <circle cx="134" cy="80" r="2" fill="#FFFFFF" opacity="0.9"/>
+                    </g>
+                    <ellipse cx="100" cy="105" rx="10" ry="7" fill="#1F2937"/>
+                    <path d="M100 112 V116 M90 114 Q100 124 110 114" stroke="#1F2937" stroke-width="2.5" stroke-linecap="round"/>
+                    <ellipse cx="45" cy="100" rx="8" ry="6" fill="#FECACA" opacity="0.6"/>
+                    <ellipse cx="155" cy="100" rx="8" ry="6" fill="#FECACA" opacity="0.6"/>
+                    <path d="M40 145 Q35 155 55 160 L65 155" stroke="#1F2937" stroke-width="12" stroke-linecap="round"/>
+                    <path d="M160 145 Q165 155 145 160 L135 155" stroke="#1F2937" stroke-width="12" stroke-linecap="round"/>
+                </g>
+            </svg>
+        </div>
+
+        <div class="header-section">
+            <h1 class="logo-text">烯晞数字健康档案</h1>
+            <p class="sub-text">智能守护您的健康生活</p>
+        </div>
+
+        <div class="login-tabs">
+            <button class="tab active" onclick="switchTab('code')">验证码登录</button>
+            <button class="tab" onclick="switchTab('password')">密码登录</button>
+        </div>
+
+        <!-- 验证码登录表单 -->
+        <form id="codeForm" class="form-container active">
+            <div class="form-group">
+                <div class="input-wrapper">
+                    <span class="country-code">+86</span>
+                    <input type="tel" class="custom-input" id="phone" placeholder="请输入手机号" maxlength="11">
+                </div>
+                <div class="error-text" id="phoneError"></div>
+            </div>
+
+            <div class="form-group">
+                <div class="code-group">
+                    <div class="input-wrapper" style="flex: 1;">
+                        <span class="prefix-icon">🔒</span>
+                        <input type="text" class="custom-input" id="verifyCode" placeholder="输入验证码" maxlength="6">
+                    </div>
+                    <button type="button" class="verify-btn" id="sendCodeBtn" onclick="sendVerifyCode()">获取验证码</button>
+                </div>
+                <div class="error-text" id="codeError"></div>
+            </div>
+
+            <button type="button" class="submit-btn" onclick="loginWithCode()">
+                立即登录
+            </button>
+        </form>
+
+        <!-- 密码登录表单 -->
+        <form id="passwordForm" class="form-container">
+            <div class="form-group">
+                <div class="input-wrapper">
+                    <span class="country-code">+86</span>
+                    <input type="tel" class="custom-input" id="phonePassword" placeholder="请输入手机号" maxlength="11">
+                </div>
+                <div class="error-text" id="phonePasswordError"></div>
+            </div>
+
+            <div class="form-group">
+                <div class="input-wrapper">
+                    <span class="prefix-icon">🔑</span>
+                    <input type="password" class="custom-input" id="password" placeholder="请输入密码">
+                    <!-- 修复：添加了ID以便JS控制 -->
+                    <span class="toggle-eye" id="eyeIcon" onclick="togglePassword()">👁</span>
+                </div>
+                <div class="error-text" id="passwordError"></div>
+            </div>
+
+            <button type="button" class="submit-btn" onclick="loginWithPassword()">
+                立即登录
+            </button>
+        </form>
+
+        <div class="footer-agreement">
+            登录即代表同意 <a href="#">用户协议</a> 与 <a href="#">隐私政策</a><br>
+            未注册的手机号将自动创建账号
+        </div>
+    </div>
+
+    <script>
+        // Tab 切换逻辑
+        function switchTab(type) {
+            const tabs = document.querySelectorAll('.tab');
+            const forms = document.querySelectorAll('.form-container');
+            
+            tabs.forEach(t => t.classList.remove('active'));
+            forms.forEach(f => f.classList.remove('active'));
+
+            if (type === 'code') {
+                tabs[0].classList.add('active');
+                document.getElementById('codeForm').classList.add('active');
+            } else {
+                tabs[1].classList.add('active');
+                document.getElementById('passwordForm').classList.add('active');
+            }
+        }
+
+        function showError(id, msg) {
+            const el = document.getElementById(id);
+            el.textContent = msg;
+            el.style.display = 'block';
+            el.previousElementSibling.style.borderColor = '#EF4444';
+        }
+
+        function hideError(id) {
+            const el = document.getElementById(id);
+            el.style.display = 'none';
+            el.previousElementSibling.style.borderColor = 'transparent';
+        }
+
+        function sendVerifyCode() {
+            const phone = document.getElementById('phone').value;
+            const btn = document.getElementById('sendCodeBtn');
+            if(!/^1[3-9]\d{9}$/.test(phone)) return showError('phoneError', '请输入正确的手机号');
+            
+            btn.disabled = true;
+            btn.textContent = '发送中...';
+            setTimeout(() => {
+                let s = 60;
+                btn.textContent = `${s}s`;
+                const timer = setInterval(() => {
+                    s--;
+                    btn.textContent = `${s}s`;
+                    if(s<=0) { clearInterval(timer); btn.disabled=false; btn.textContent='重新获取'; }
+                }, 1000);
+            }, 1000);
+        }
+
+        function loginWithCode() {
+            const phone = document.getElementById('phone').value;
+            const code = document.getElementById('verifyCode').value;
+            if(!phone) return showError('phoneError', '请输入手机号');
+            if(!code) return showError('codeError', '请输入验证码');
+            alert('登录成功 (演示)');
+        }
+
+        function loginWithPassword() {
+            const phone = document.getElementById('phonePassword').value;
+            const pwd = document.getElementById('password').value;
+            if(!phone) return showError('phonePasswordError', '请输入手机号');
+            if(!pwd) return showError('passwordError', '请输入密码');
+            alert('登录成功 (演示)');
+        }
+
+        // 修复：密码可见性切换逻辑
+        function togglePassword() {
+            const inp = document.getElementById('password');
+            const icon = document.getElementById('eyeIcon');
+            
+            if (inp.type === 'password') {
+                inp.type = 'text';
+                icon.textContent = '🙈'; // 变为闭眼/猴子捂眼图标，表示当前是明文，点击可隐藏
+            } else {
+                inp.type = 'password';
+                icon.textContent = '👁'; // 变为眼睛图标，表示当前是密文，点击可查看
+            }
+        }
+
+        // 监听输入清空错误
+        document.querySelectorAll('input').forEach(i => {
+            i.addEventListener('input', function() {
+                const errId = this.id.includes('Password') ? 
+                    (this.id==='password'?'passwordError':'phonePasswordError') : 
+                    (this.id==='phone'?'phoneError':'codeError');
+                if(document.getElementById(errId)) hideError(errId);
+            });
+        });
+    </script>
+</body>
+</html>

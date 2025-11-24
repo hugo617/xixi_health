@@ -54,3 +54,7 @@ log/*.pid
 # 临时文件
 tmp/*
 !tmp/.keep
+
+/identify
+/Requirement
+/temp

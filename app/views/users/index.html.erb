@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>用户管理控制台 - MyShell Pro Style</title>
+    <style>
+        :root {
+            /* 核心配色：MyShell 风格的薄荷绿与深林绿 */
+            --primary: #10b981;
+            --primary-hover: #059669;
+            --bg-color: #f0fdf4;
+            --text-main: #111827;
+            --text-sub: #6b7280;
+            
+            /* 玻璃拟态参数 */
+            --glass-bg: rgba(255, 255, 255, 0.75);
+            --glass-border: rgba(255, 255, 255, 0.8);
+            --glass-blur: 24px;
+            
+            /* 阴影 */
+            --card-shadow: 0 25px 50px -12px rgba(16, 185, 129, 0.15);
+            --radius: 24px;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start; /* 顶部对齐 */
+            padding-top: 100px; /* 给熊猫留出头部空间 */
+            padding-bottom: 50px;
+            
+            /* MyShell 标志性的点阵背景纹理 */
+            background-image: 
+                radial-gradient(var(--primary) 1.5px, transparent 1.5px),
+                radial-gradient(rgba(16, 185, 129, 0.4) 1px, transparent 1px);
+            background-size: 30px 30px, 10px 10px; /* 双层点阵创造景深 */
+            background-position: 0 0, 15px 15px;
+        }
+
+        /* 主容器：强化的玻璃拟态效果 */
+        .container {
+            width: 92%;
+            max-width: 1100px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(var(--glass-blur));
+            -webkit-backdrop-filter: blur(var(--glass-blur));
+            border-radius: var(--radius);
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--card-shadow), inset 0 0 0 1px rgba(255,255,255,0.5);
+            padding: 40px;
+            position: relative;
+        }
+
+        /* ---------------- 吉祥物 (熊猫) ---------------- */
+        .mascot-container {
+            position: absolute;
+            top: -85px; /* 趴在卡片顶端 */
+            right: 50px;
+            width: 120px;
+            height: 100px;
+            z-index: 10;
+            animation: float 5s ease-in-out infinite;
+            filter: drop-shadow(0 10px 15px rgba(0,0,0,0.1));
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-8px) rotate(2deg); }
+        }
+
+        /* ---------------- Header 区域 ---------------- */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 35px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .title-group {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo-box {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #34d399, #059669);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            box-shadow: 0 8px 15px -3px rgba(16, 185, 129, 0.3);
+        }
+
+        .title-text h1 {
+            font-size: 1.75rem;
+            font-weight: 800;
+            background: linear-gradient(to right, #065f46, #10b981);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.5px;
+        }
+
+        .title-text p {
+            color: var(--text-sub);
+            font-size: 0.9rem;
+            margin-top: 4px;
+        }
+
+        /* 新增用户按钮 */
+        .btn-add {
+            background: var(--text-main);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .btn-add:hover {
+            background: #000;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 12px rgba(0,0,0,0.15);
+        }
+
+        /* ---------------- 功能栏 (搜索) ---------------- */
+        .controls {
+            display: flex;
+            margin-bottom: 25px;
+        }
+
+        .search-box {
+            position: relative;
+            width: 100%;
+            max-width: 350px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 14px 20px 14px 45px;
+            border-radius: 14px;
+            border: 2px solid transparent;
+            background: rgba(255,255,255,0.6);
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+        
+        .search-box input:focus {
+            background: white;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #9ca3af;
+        }
+
+        /* ---------------- 表格区域 ---------------- */
+        .table-wrapper {
+            background: rgba(255, 255, 255, 0.4);
+            border-radius: 18px;
+            overflow: hidden; /* 圆角裁切 */
+            border: 1px solid rgba(255,255,255,0.5);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            text-align: left;
+            padding: 18px 24px;
+            color: #047857;
+            font-weight: 700;
+            font-size: 0.9rem;
+            background: rgba(16, 185, 129, 0.05);
+            cursor: pointer;
+            user-select: none;
+            white-space: nowrap;
+        }
+
+        th:hover {
+            background: rgba(16, 185, 129, 0.1);
+        }
+
+        td {
+            padding: 16px 24px;
+            border-bottom: 1px solid rgba(0,0,0,0.03);
+            font-size: 0.95rem;
+            vertical-align: middle;
+        }
+
+        tr:last-child td { border-bottom: none; }
+        
+        /* 表格行悬停效果 */
+        tr:hover {
+            background-color: rgba(255,255,255,0.8);
+        }
+
+        /* 用户名单元格样式 */
+        .user-cell {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .avatar {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, #a7f3d0, #34d399);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #064e3b;
+            font-weight: 700;
+            font-size: 0.85rem;
+        }
+
+        /* 状态标签 */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        .status-active { background: #dcfce7; color: #15803d; }
+        .status-inactive { background: #f3f4f6; color: #4b5563; }
+        .status-banned { background: #fee2e2; color: #b91c1c; }
+        
+        /* 状态圆点 */
+        .dot {
+            width: 6px; height: 6px; border-radius: 50%; margin-right: 6px; background: currentColor;
+        }
+
+        /* 操作按钮 */
+        .btn-action {
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            border: 1px solid transparent;
+            margin-right: 6px;
+            transition: 0.2s;
+        }
+        .btn-edit { background: white; border-color: #e5e7eb; color: var(--text-main); }
+        .btn-edit:hover { border-color: var(--primary); color: var(--primary); }
+        .btn-del { background: white; border-color: #fca5a5; color: #ef4444; }
+        .btn-del:hover { background: #fef2f2; border-color: #ef4444; }
+
+        /* 排序图标 */
+        .sort-icon {
+            display: inline-block;
+            width: 15px;
+            margin-left: 5px;
+            text-align: center;
+            color: var(--primary);
+            opacity: 0.7;
+        }
+
+        /* ---------------- 模态框 (新增/编辑) ---------------- */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.3);
+            backdrop-filter: blur(8px); /* 模糊背景 */
+            z-index: 100;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .modal-overlay.show { display: flex; opacity: 1; }
+
+        .modal-card {
+            background: white;
+            width: 100%;
+            max-width: 420px;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            transform: scale(0.95);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .modal-overlay.show .modal-card { transform: scale(1); }
+
+        .modal-header h2 { margin-bottom: 20px; font-size: 1.5rem; color: #111827; }
+
+        .form-group { margin-bottom: 20px; }
+        .form-label { display: block; margin-bottom: 8px; font-size: 0.9rem; font-weight: 500; color: var(--text-sub); }
+        .form-input {
+            width: 100%; padding: 12px;
+            border: 2px solid #e5e7eb; border-radius: 10px;
+            font-size: 1rem; outline: none; transition: 0.2s;
+        }
+        .form-input:focus { border-color: var(--primary); }
+
+        .modal-footer { display: flex; justify-content: flex-end; gap: 12px; margin-top: 25px; }
+        .btn-cancel { background: #f3f4f6; color: #4b5563; border: none; padding: 10px 20px; border-radius: 10px; cursor: pointer; font-weight: 500; }
+        .btn-submit { background: var(--primary); color: white; border: none; padding: 10px 24px; border-radius: 10px; cursor: pointer; font-weight: 600; }
+        .btn-submit:hover { background: var(--primary-hover); }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- 吉祥物：趴在卡片上的熊猫 -->
+        <div class="mascot-container">
+            <svg viewBox="0 0 200 160" xmlns="http://www.w3.org/2000/svg">
+                <!-- 身体阴影 -->
+                <path d="M40 160 Q100 150 160 160" fill="none" stroke="rgba(0,0,0,0.1)" stroke-width="4"/>
+                <!-- 耳朵 -->
+                <circle cx="50" cy="50" r="22" fill="#1f2937"/>
+                <circle cx="150" cy="50" r="22" fill="#1f2937"/>
+                <!-- 脸 -->
+                <ellipse cx="100" cy="90" rx="70" ry="60" fill="#fff"/>
+                <!-- 眼睛 -->
+                <ellipse cx="70" cy="85" rx="18" ry="22" fill="#1f2937" transform="rotate(-20 70 85)"/>
+                <ellipse cx="130" cy="85" rx="18" ry="22" fill="#1f2937" transform="rotate(20 130 85)"/>
+                <circle cx="72" cy="82" r="5" fill="#fff"/>
+                <circle cx="128" cy="82" r="5" fill="#fff"/>
+                <!-- 鼻子 -->
+                <ellipse cx="100" cy="115" rx="10" ry="7" fill="#1f2937"/>
+                <!-- 装饰：小竹叶 -->
+                <path d="M140 120 Q160 100 180 110 Q160 120 140 120" fill="#10b981"/>
+            </svg>
+        </div>
+
+        <div class="header">
+            <div class="title-group">
+                <!-- MyShell 风格 Logo -->
+                <div class="logo-box">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
+                    </svg>
+                </div>
+                <div class="title-text">
+                    <h1>User Management</h1>
+                    <p>管理系统核心用户数据</p>
+                </div>
+            </div>
+            
+            <!-- 新增功能：添加用户按钮 -->
+            <button class="btn-add" onclick="openAddModal()">
+                <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+                </svg>
+                新增用户
+            </button>
+        </div>
+
+        <div class="controls">
+            <div class="search-box">
+                <span class="search-icon">
+                    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                </span>
+                <input type="text" id="searchInput" placeholder="搜索用户名..." onkeyup="handleSearch()">
+            </div>
+        </div>
+
+        <div class="table-wrapper">
+            <table id="userTable">
+                <thead>
+                    <tr>
+                        <th onclick="sortTable('username')">
+                            用户名 <span id="icon-username" class="sort-icon">⇅</span>
+                        </th>
+                        <th>邮箱地址</th>
+                        <th onclick="sortTable('regTime')">
+                            注册时间 <span id="icon-regTime" class="sort-icon">⇅</span>
+                        </th>
+                        <th>用户状态</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <!-- 数据将由 JS 渲染 -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- 1. 新增用户模态框 -->
+    <div class="modal-overlay" id="addModal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h2>👤 添加新用户</h2>
+            </div>
+            <form id="addForm">
+                <div class="form-group">
+                    <label class="form-label">用户名</label>
+                    <input type="text" id="addUsername" class="form-input" placeholder="例如: PandaUser" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">邮箱</label>
+                    <input type="email" id="addEmail" class="form-input" placeholder="user@example.com" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">初始状态</label>
+                    <select id="addStatus" class="form-input">
+                        <option value="Active">正常 (Active)</option>
+                        <option value="Inactive">停用 (Inactive)</option>
+                    </select>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-cancel" onclick="closeModal('addModal')">取消</button>
+                    <button type="submit" class="btn-submit">确认添加</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 2. 编辑用户模态框 -->
+    <div class="modal-overlay" id="editModal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h2>✏️ 编辑用户</h2>
+            </div>
+            <form id="editForm">
+                <input type="hidden" id="editId">
+                <div class="form-group">
+                    <label class="form-label">用户名</label>
+                    <input type="text" id="editUsername" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">邮箱</label>
+                    <input type="email" id="editEmail" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">用户状态</label>
+                    <select id="editStatus" class="form-input">
+                        <option value="Active">正常 (Active)</option>
+                        <option value="Inactive">停用 (Inactive)</option>
+                        <option value="Banned">封禁 (Banned)</option>
+                    </select>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-cancel" onclick="closeModal('editModal')">取消</button>
+                    <button type="submit" class="btn-submit">保存修改</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // 初始数据
+        let users = [
+            { id: 1, username: 'MyShell_Admin', email: 'admin@myshell.ai', regTime: '2023-01-15', status: 'Active' },
+            { id: 2, username: 'Bamboo_Eater', email: 'panda@zoo.net', regTime: '2023-06-20', status: 'Active' },
+            { id: 3, username: 'GreenForest', email: 'tree@nature.com', regTime: '2023-08-05', status: 'Inactive' },
+            { id: 4, username: 'CyberPunk', email: 'neon@city.io', regTime: '2023-11-12', status: 'Active' },
+            { id: 5, username: 'SpamBot_X', email: 'bot@spam.com', regTime: '2023-02-10', status: 'Banned' }
+        ];
+
+        let currentData = [...users];
+        
+        // 独立排序状态记录 (Feature: 点击一个不重置另一个图标)
+        let sortStates = {
+            username: 'none',
+            regTime: 'none'
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            renderTable(currentData);
+        });
+
+        // 渲染表格
+        function renderTable(data) {
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '';
+
+            if (data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding: 40px; color: #999;">🔍 未找到匹配的用户</td></tr>';
+                return;
+            }
+
+            data.forEach(user => {
+                // 状态样式映射
+                let badgeClass = '';
+                let statusText = '';
+                switch(user.status) {
+                    case 'Active': badgeClass = 'status-active'; statusText = '正常'; break;
+                    case 'Inactive': badgeClass = 'status-inactive'; statusText = '停用'; break;
+                    case 'Banned': badgeClass = 'status-banned'; statusText = '封禁'; break;
+                }
+
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>
+                        <div class="user-cell">
+                            <div class="avatar">${user.username.charAt(0).toUpperCase()}</div>
+                            <span style="font-weight:600;">${user.username}</span>
+                        </div>
+                    </td>
+                    <td style="color:var(--text-sub);">${user.email}</td>
+                    <td style="font-family:monospace; color:var(--text-sub);">${user.regTime}</td>
+                    <td>
+                        <span class="badge ${badgeClass}">
+                            <span class="dot"></span>${statusText}
+                        </span>
+                    </td>
+                    <td>
+                        <button class="btn-action btn-edit" onclick="openEdit(${user.id})">编辑</button>
+                        <button class="btn-action btn-del" onclick="deleteUser(${user.id})">删除</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // 搜索功能
+        function handleSearch() {
+            const keyword = document.getElementById('searchInput').value.toLowerCase();
+            currentData = users.filter(u => u.username.toLowerCase().includes(keyword));
+            
+            // 搜索后，如果之前有排序，重新应用排序逻辑
+            // (这里简化处理，搜索后暂时按默认显示，或者你可以记录当前激活的sortKey重新排序)
+            renderTable(currentData);
+        }
+
+        // 排序功能 (独立状态)
+        function sortTable(key) {
+            // 1. 获取该列当前状态并反转
+            let currentDir = sortStates[key];
+            let newDir = (currentDir === 'asc') ? 'desc' : 'asc';
+            
+            // 2. 更新状态
+            sortStates[key] = newDir;
+
+            // 3. 更新图标 (仅更新被点击的那一列，不重置其他列图标)
+            const icon = document.getElementById(`icon-${key}`);
+            icon.innerText = newDir === 'asc' ? '↑' : '↓';
+
+            // 4. 执行排序
+            currentData.sort((a, b) => {
+                if (a[key] < b[key]) return newDir === 'asc' ? -1 : 1;
+                if (a[key] > b[key]) return newDir === 'asc' ? 1 : -1;
+                return 0;
+            });
+            renderTable(currentData);
+        }
+
+        // 删除功能
+        function deleteUser(id) {
+            if (confirm('确定要删除此用户吗？操作不可恢复。')) {
+                users = users.filter(u => u.id !== id);
+                handleSearch(); // 刷新视图
+            }
+        }
+
+        /* -------- 模态框通用逻辑 -------- */
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('show');
+        }
+
+        // 点击遮罩层关闭
+        window.onclick = function(e) {
+            if (e.target.classList.contains('modal-overlay')) {
+                e.target.classList.remove('show');
+            }
+        }
+
+        /* -------- 新增用户逻辑 -------- */
+        function openAddModal() {
+            document.getElementById('addForm').reset();
+            document.getElementById('addModal').classList.add('show');
+        }
+
+        document.getElementById('addForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const newUser = {
+                id: Date.now(), // 简单生成ID
+                username: document.getElementById('addUsername').value,
+                email: document.getElementById('addEmail').value,
+                status: document.getElementById('addStatus').value,
+                regTime: new Date().toISOString().split('T')[0] // 当前日期 YYYY-MM-DD
+            };
+
+            // 添加到数据源头部
+            users.unshift(newUser);
+            
+            closeModal('addModal');
+            handleSearch(); // 刷新表格
+            alert('🎉 新用户添加成功！');
+        });
+
+        /* -------- 编辑用户逻辑 -------- */
+        function openEdit(id) {
+            const user = users.find(u => u.id === id);
+            if (!user) return;
+
+            document.getElementById('editId').value = user.id;
+            document.getElementById('editUsername').value = user.username;
+            document.getElementById('editEmail').value = user.email;
+            document.getElementById('editStatus').value = user.status;
+
+            document.getElementById('editModal').classList.add('show');
+        }
+
+        document.getElementById('editForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const id = parseInt(document.getElementById('editId').value);
+            const index = users.findIndex(u => u.id === id);
+
+            if (index !== -1) {
+                users[index].username = document.getElementById('editUsername').value;
+                users[index].email = document.getElementById('editEmail').value;
+                users[index].status = document.getElementById('editStatus').value;
+
+                closeModal('editModal');
+                handleSearch();
+            }
+        });
+
+    </script>
+</body>
+</html>
