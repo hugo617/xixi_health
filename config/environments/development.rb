@@ -66,6 +66,13 @@ Rails.application.configure do
 
   # Raises error for missing translations.
   # config.i18n.raise_on_missing_translations = true
+  
+  # 确保开发环境使用UTF-8编码
+  config.force_ssl = false
+  
+  # 设置默认字符编码
+  Encoding.default_external = Encoding::UTF_8
+  Encoding.default_internal = Encoding::UTF_8
 
   # Annotate rendered view with file names.
   config.action_view.annotate_rendered_view_with_filenames = true

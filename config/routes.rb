@@ -6,6 +6,15 @@ Rails.application.routes.draw do
   get "login" => "login#index"
   get "users" => "users#index"
   get "reports" => "reports#index"
+  
+  # API路由配置
+  namespace :api do
+    namespace :v1 do
+      # 用户搜索接口
+      post 'users/search', to: 'users#search'
+    end
+  end
+  
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
   # Can be used by load balancers and uptime monitors to verify that the app is live.
   get "up" => "rails/health#show", as: :rails_health_check

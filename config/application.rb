@@ -23,5 +23,11 @@ module XixiHealth
     #
     # config.time_zone = "Central Time (US & Canada)"
     # config.eager_load_paths << Rails.root.join("extras")
+    
+    # 设置默认编码为UTF-8
+    config.encoding = "utf-8"
+    
+    # 确保JSON响应用UTF-8编码
+    config.action_dispatch.default_charset = 'utf-8'
   end
 end
