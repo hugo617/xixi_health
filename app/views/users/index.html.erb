@@ -144,6 +144,9 @@
         /* ---------------- 功能栏 (搜索) ---------------- */
         .controls {
             display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            align-items: center;
             margin-bottom: 25px;
         }
 
@@ -178,12 +181,409 @@
             color: #9ca3af;
         }
 
+        .filter-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .filter-select {
+            padding: 12px 14px;
+            border-radius: 14px;
+            border: 1px solid rgba(0,0,0,0.08);
+            background: rgba(255,255,255,0.9);
+            font-size: 0.9rem;
+            color: var(--text-main);
+            min-width: 150px;
+            transition: border-color 0.2s;
+        }
+
+        .filter-select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+        }
+
+        .btn-refresh {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 10px 16px;
+            border-radius: 12px;
+            border: 1px solid rgba(16,185,129,0.2);
+            background: white;
+            color: var(--primary);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-refresh:hover {
+            background: rgba(16,185,129,0.08);
+            border-color: var(--primary);
+        }
+
+        .btn-refresh.subtle {
+            border-color: rgba(0,0,0,0.05);
+            color: var(--text-main);
+        }
+
+        .btn-refresh.subtle:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
         /* ---------------- 表格区域 ---------------- */
         .table-wrapper {
             background: rgba(255, 255, 255, 0.4);
             border-radius: 18px;
-            overflow: hidden; /* 圆角裁切 */
             border: 1px solid rgba(255,255,255,0.5);
+            position: relative;
+            overflow: auto; /* 启用滚动 */
+            max-height: 70vh; /* 最大高度70%视口高度 */
+            min-height: 400px; /* 最小高度 */
+        }
+
+        /* 表格滚动容器 */
+        .table-scroll-container {
+            overflow: auto;
+            position: relative;
+            max-height: inherit;
+        }
+
+        /* 固定表头样式 */
+        .table-wrapper thead th {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            background: rgba(16, 185, 129, 0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-bottom: 2px solid rgba(16, 185, 129, 0.2);
+        }
+
+        /* 优化表格布局 */
+        .data-table {
+            width: auto;
+            min-width: 100%; /* 保证表格可以横向扩展 */
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+
+        /* >>>>> 修复核心开始：列宽与溢出处理 <<<<< */
+        .data-table th,
+        .data-table td {
+            white-space: nowrap; /* 防止文本换行 */
+            max-width: 300px; /* 最大列宽 */
+            min-width: 80px; /* 最小列宽 */
+        }
+
+        /* 单独处理 td：内容过长显示省略号 */
+        .data-table td {
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* 单独处理 th：不允许省略号，确保图标显示 */
+        .data-table th {
+            overflow: visible;
+            text-overflow: clip;
+        }
+
+        /* 特定列宽设置（调整了部分宽度以适应居中和图标） */
+        .data-table th:nth-child(1), /* 用户名 */
+        .data-table td:nth-child(1) {
+            min-width: 150px;
+            max-width: 200px;
+        }
+
+        .data-table th:nth-child(2), /* 邮箱 */
+        .data-table td:nth-child(2) {
+            min-width: 200px;
+            max-width: 250px;
+        }
+
+        .data-table th:nth-child(3), /* 手机号 */
+        .data-table td:nth-child(3) {
+            min-width: 120px;
+            max-width: 150px;
+        }
+
+        /* 修复：增加宽度以容纳文字和排序图标 */
+        .data-table th:nth-child(4), /* 角色 */
+        .data-table td:nth-child(4) {
+            min-width: 110px; /* 从100px调整到110px */
+            max-width: 130px;
+        }
+
+        /* 修复：增加宽度以容纳文字和排序图标 */
+        .data-table th:nth-child(5), /* 会员类型 */
+        .data-table td:nth-child(5) {
+            min-width: 110px; /* 从100px调整到110px */
+            max-width: 130px;
+        }
+
+        .data-table th:nth-child(6), /* 注册时间 */
+        .data-table td:nth-child(6) {
+            min-width: 120px;
+            max-width: 150px;
+        }
+
+        .data-table th:nth-child(7), /* 最近更新 */
+        .data-table td:nth-child(7) {
+            min-width: 120px;
+            max-width: 160px;
+        }
+
+        .data-table th:nth-child(8), /* 状态 */
+        .data-table td:nth-child(8) {
+            min-width: 90px;
+            max-width: 110px;
+        }
+
+        .data-table th:nth-child(9), /* 操作 */
+        .data-table td:nth-child(9) {
+            min-width: 150px;
+            max-width: 190px;
+        }
+        /* >>>>> 修复核心结束 <<<<< */
+
+        /* 行高优化 */
+        .data-table th {
+            height: 50px; /* 固定表头高度 */
+            line-height: 1.2;
+        }
+
+        .data-table td {
+            height: 60px; /* 固定行高 */
+            line-height: 1.4;
+            vertical-align: middle;
+        }
+
+        /* 滚动条美化 */
+        .table-wrapper::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        .table-wrapper::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+        }
+
+        .table-wrapper::-webkit-scrollbar-thumb {
+            background: rgba(16, 185, 129, 0.3);
+            border-radius: 4px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .table-wrapper::-webkit-scrollbar-thumb:hover {
+            background: rgba(16, 185, 129, 0.5);
+        }
+
+        /* 横向滚动指示器 */
+        .table-scroll-indicator {
+            position: absolute;
+            bottom: 8px;
+            right: 8px;
+            background: rgba(16, 185, 129, 0.2);
+            color: #047857;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .table-scroll-indicator.show {
+            opacity: 1;
+        }
+
+        /* 响应式表格高度 */
+        @media (max-height: 800px) {
+            .table-wrapper {
+                max-height: 60vh;
+            }
+        }
+
+        @media (max-height: 600px) {
+            .table-wrapper {
+                max-height: 50vh;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .filter-group {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            .filter-select {
+                flex: 1;
+                min-width: calc(33% - 8px);
+            }
+
+            .table-wrapper {
+                max-height: 50vh;
+                margin: 0 -10px; /* 移动端边缘扩展 */
+                border-radius: 12px;
+            }
+            
+            .data-table th,
+            .data-table td {
+                padding: 12px 16px; /* 减小移动端内边距 */
+                font-size: 0.85rem;
+                min-width: 70px; /* 移动端减小最小宽度 */
+                max-width: 200px; /* 移动端减小最大宽度 */
+            }
+            
+            /* 移动端优化列宽 */
+            .data-table th:nth-child(1), /* 用户名 */
+            .data-table td:nth-child(1) {
+                min-width: 120px;
+                max-width: 150px;
+            }
+            
+            .data-table th:nth-child(2), /* 邮箱 */
+            .data-table td:nth-child(2) {
+                min-width: 150px;
+                max-width: 180px;
+            }
+            
+            .data-table th:nth-child(3), /* 手机号 */
+            .data-table td:nth-child(3) {
+                min-width: 100px;
+                max-width: 120px;
+            }
+            
+            .data-table th:nth-child(4), /* 角色 */
+            .data-table td:nth-child(4) {
+                min-width: 80px;
+                max-width: 100px;
+            }
+            
+            .data-table th:nth-child(5), /* 会员类型 */
+            .data-table td:nth-child(5) {
+                min-width: 80px;
+                max-width: 100px;
+            }
+            
+            .data-table th:nth-child(6), /* 注册时间 */
+            .data-table td:nth-child(6) {
+                min-width: 100px;
+                max-width: 120px;
+            }
+            
+            .data-table th:nth-child(7), /* 最近更新 */
+            .data-table td:nth-child(7) {
+                min-width: 110px;
+                max-width: 130px;
+            }
+            
+            .data-table th:nth-child(8), /* 状态 */
+            .data-table td:nth-child(8) {
+                min-width: 70px;
+                max-width: 90px;
+            }
+            
+            .data-table th:nth-child(9), /* 操作 */
+            .data-table td:nth-child(9) {
+                min-width: 120px;
+                max-width: 150px;
+            }
+            
+            /* 移动端优化按钮大小 */
+            .btn-action {
+                padding: 4px 8px;
+                font-size: 0.75rem;
+                margin-right: 4px;
+            }
+            
+            /* 移动端优化用户单元格 */
+            .user-cell {
+                gap: 8px;
+            }
+            
+            .user-cell .avatar {
+                width: 28px;
+                height: 28px;
+                font-size: 0.75rem;
+            }
+            
+            /* 移动端滚动指示器优化 */
+            .table-scroll-indicator {
+                font-size: 0.7rem;
+                padding: 3px 6px;
+                bottom: 5px;
+                right: 5px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .table-wrapper {
+                max-height: 45vh;
+                margin: 0 -15px;
+            }
+            
+            .data-table th,
+            .data-table td {
+                padding: 10px 12px;
+                font-size: 0.8rem;
+            }
+            
+            /* 超小屏幕时隐藏某些列的排序图标 */
+            .sort-icon {
+                font-size: 10px;
+                margin-left: 2px;
+            }
+        }
+
+        /* 触摸设备优化 */
+        @media (hover: none) and (pointer: coarse) {
+            .table-wrapper::-webkit-scrollbar {
+                width: 12px;
+                height: 12px;
+            }
+            
+            .table-wrapper::-webkit-scrollbar-thumb {
+                background: rgba(16, 185, 129, 0.6);
+                min-height: 20px;
+                min-width: 20px;
+            }
+            
+            .table-wrapper {
+                -webkit-overflow-scrolling: touch; /* iOS惯性滚动 */
+            }
+        }
+
+        /* 打印样式优化 */
+        @media print {
+            .table-wrapper {
+                max-height: none !important;
+                overflow: visible !important;
+                border: 1px solid #ddd;
+            }
+            
+            .table-scroll-indicator {
+                display: none !important;
+            }
+            
+            .data-table th,
+            .data-table td {
+                white-space: normal !important;
+                max-width: none !important;
+                min-width: auto !important;
+            }
         }
 
         table {
@@ -191,8 +591,9 @@
             border-collapse: collapse;
         }
 
+        /* >>>>> 修复核心：表头居中 <<<<< */
         th {
-            text-align: left;
+            text-align: center; /* 改为居中 */
             padding: 18px 24px;
             color: #047857;
             font-weight: 700;
@@ -212,6 +613,7 @@
             border-bottom: 1px solid rgba(0,0,0,0.03);
             font-size: 0.95rem;
             vertical-align: middle;
+            text-align: left; /* 保持数据左对齐，如果需要也可以改为center */
         }
 
         tr:last-child td { border-bottom: none; }
@@ -253,6 +655,32 @@
         .status-inactive { background: #f3f4f6; color: #4b5563; }
         .status-banned { background: #fee2e2; color: #b91c1c; }
         
+        /* 角色标签 */
+        .role-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        .role-admin { background: #dbeafe; color: #1e40af; }
+        .role-user { background: #f0f9ff; color: #0369a1; }
+        
+        /* 会员类型标签 */
+        .membership-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        .membership-session_card { background: #fef3c7; color: #92400e; }
+        .membership-monthly_card { background: #ddd6fe; color: #7c3aed; }
+        .membership-annual_card { background: #a7f3d0; color: #047857; }
+        .membership-no_membership { background: #f3f4f6; color: #6b7280; }
+        
         /* 状态圆点 */
         .dot {
             width: 6px; height: 6px; border-radius: 50%; margin-right: 6px; background: currentColor;
@@ -282,6 +710,85 @@
             text-align: center;
             color: var(--primary);
             opacity: 0.7;
+        }
+
+        .sort-icon.active {
+            opacity: 1;
+            font-weight: 700;
+        }
+
+        /* 分页组件 */
+        .pagination-wrapper {
+            margin-top: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.4);
+            border-radius: 18px;
+            border: 1px solid rgba(255,255,255,0.5);
+        }
+
+        .pagination-info {
+            color: var(--text-sub);
+            font-size: 0.9rem;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .pagination-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .pagination-btn {
+            padding: 8px 12px;
+            border: 1px solid #e5e7eb;
+            background: white;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            min-width: 36px;
+            text-align: center;
+        }
+
+        .pagination-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .pagination-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .pagination-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .pagination-btn:disabled:hover {
+            border-color: #e5e7eb;
+            color: inherit;
+        }
+
+        .page-size-selector {
+            margin-left: 15px;
+            padding: 6px 10px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            background: white;
+            font-size: 0.85rem;
+            cursor: pointer;
+        }
+
+        .page-size-selector:focus {
+            outline: none;
+            border-color: var(--primary);
         }
 
         /* ---------------- 模态框 (新增/编辑) ---------------- */
@@ -381,29 +888,78 @@
                 <span class="search-icon">
                     <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                 </span>
-                <input type="text" id="searchInput" placeholder="搜索用户名..." onkeyup="handleSearch()">
+                <input type="text" id="searchInput" placeholder="搜索姓名 / 邮箱 / 手机号">
+            </div>
+            <div class="filter-group">
+                <select id="filterStatus" class="filter-select" aria-label="筛选用户状态">
+                    <option value="">全部状态</option>
+                    <option value="active">正常用户</option>
+                    <option value="inactive">已停用</option>
+                </select>
+                <select id="filterRole" class="filter-select" aria-label="筛选用户角色">
+                    <option value="">全部角色</option>
+                    <option value="admin">管理员</option>
+                    <option value="user">普通用户</option>
+                </select>
+                <select id="filterMembership" class="filter-select" aria-label="筛选会员类型">
+                    <option value="">全部会员</option>
+                    <option value="annual_card">年卡</option>
+                    <option value="monthly_card">月卡</option>
+                    <option value="session_card">次卡</option>
+                    <option value="no_membership">无会员</option>
+                </select>
+                <button type="button" class="btn-refresh" id="btnResetFilters">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><polyline points="23 20 23 14 17 14"/><path d="M20.49 9A9 9 0 1 0 6 4.33"/></svg>
+                    清除筛选
+                </button>
+                <button type="button" class="btn-refresh subtle" id="btnRefresh">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 15A9 9 0 1 0 18 19.67"/></svg>
+                    刷新数据
+                </button>
             </div>
         </div>
 
         <div class="table-wrapper">
-            <table id="userTable">
-                <thead>
-                    <tr>
-                        <th onclick="sortTable('username')">
-                            用户名 <span id="icon-username" class="sort-icon">⇅</span>
-                        </th>
-                        <th>邮箱地址</th>
-                        <th onclick="sortTable('regTime')">
-                            注册时间 <span id="icon-regTime" class="sort-icon">⇅</span>
-                        </th>
-                        <th>用户状态</th>
-                        <th>操作</th>
-                    </tr>
-                </thead>
-                <tbody id="tableBody">
-                    <!-- 数据将由 JS 渲染 -->
-                </tbody>
-            </table>
+            <div class="table-scroll-container" id="tableScrollContainer">
+                <table id="userTable" class="data-table">
+                    <thead>
+                        <tr>
+                            <th onclick="sortTable('username')">
+                                用户名 <span id="icon-username" class="sort-icon">⇅</span>
+                            </th>
+                            <th>邮箱地址</th>
+                            <th onclick="sortTable('phone')">
+                                手机号 <span id="icon-phone" class="sort-icon">⇅</span>
+                            </th>
+                            <th onclick="sortTable('role')">
+                                用户角色 <span id="icon-role" class="sort-icon">⇅</span>
+                            </th>
+                            <th onclick="sortTable('membership_type')">
+                                会员类型 <span id="icon-membership_type" class="sort-icon">⇅</span>
+                            </th>
+                            <th onclick="sortTable('regTime')">
+                                注册时间 <span id="icon-regTime" class="sort-icon">⇅</span>
+                            </th>
+                            <th onclick="sortTable('updatedAt')">
+                                最近更新 <span id="icon-updatedAt" class="sort-icon">⇅</span>
+                            </th>
+                            <th>用户状态</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                        <!-- 数据将由 JS 渲染 -->
+                    </tbody>
+                </table>
+            </div>
+            <div class="table-scroll-indicator" id="scrollIndicator">
+                ← 横向滚动查看更多 →
+            </div>
+        </div>
+
+        <!-- 分页组件 -->
+        <div class="pagination-wrapper" id="paginationWrapper">
+            <!-- 分页控件将由 JS 渲染 -->
         </div>
     </div>
 
@@ -454,6 +1010,26 @@
                     <input type="email" id="editEmail" class="form-input" required>
                 </div>
                 <div class="form-group">
+                    <label class="form-label">手机号</label>
+                    <input type="tel" id="editPhone" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">用户角色</label>
+                    <select id="editRole" class="form-input">
+                        <option value="user">普通用户</option>
+                        <option value="admin">管理员</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">会员类型</label>
+                    <select id="editMembership" class="form-input">
+                        <option value="no_membership">无会员</option>
+                        <option value="session_card">次卡</option>
+                        <option value="monthly_card">月卡</option>
+                        <option value="annual_card">年卡</option>
+                    </select>
+                </div>
+                <div class="form-group">
                     <label class="form-label">用户状态</label>
                     <select id="editStatus" class="form-input">
                         <option value="Active">正常 (Active)</option>
@@ -470,199 +1046,687 @@
     </div>
 
     <script>
-        // 初始数据
-        let users = [
-            { id: 1, username: 'MyShell_Admin', email: 'admin@myshell.ai', regTime: '2023-01-15', status: 'Active' },
-            { id: 2, username: 'Bamboo_Eater', email: 'panda@zoo.net', regTime: '2023-06-20', status: 'Active' },
-            { id: 3, username: 'GreenForest', email: 'tree@nature.com', regTime: '2023-08-05', status: 'Inactive' },
-            { id: 4, username: 'CyberPunk', email: 'neon@city.io', regTime: '2023-11-12', status: 'Active' },
-            { id: 5, username: 'SpamBot_X', email: 'bot@spam.com', regTime: '2023-02-10', status: 'Banned' }
-        ];
-
-        let currentData = [...users];
-        
-        // 独立排序状态记录 (Feature: 点击一个不重置另一个图标)
-        let sortStates = {
-            username: 'none',
-            regTime: 'none'
+        const API_ENDPOINT = '/api/v1/users/search';
+        const MEMBERSHIP_TEXT = {
+            session_card: '次卡',
+            monthly_card: '月卡',
+            annual_card: '年卡',
+            no_membership: '无会员'
         };
 
+        const state = {
+            users: [],
+            currentData: [],
+            isLoading: false,
+            currentPage: 1,
+            perPage: 20,
+            totalPages: 1,
+            totalCount: 0,
+            keyword: '',
+            filters: {
+                status: '',
+                role: '',
+                membership_type: ''
+            },
+            sortStates: {
+                username: 'none',
+                regTime: 'none',
+                updatedAt: 'none',
+                phone: 'none',
+                role: 'none',
+                membership_type: 'none'
+            },
+            scrollInitialized: false
+        };
+
+        const SORT_ICONS = { asc: '↑', desc: '↓', none: '⇅' };
+
+        function debounce(fn, delay = 300) {
+            let timerId;
+            return (...args) => {
+                if (timerId) {
+                    clearTimeout(timerId);
+                }
+                timerId = setTimeout(() => fn(...args), delay);
+            };
+        }
+
+        const debouncedSearch = debounce((keyword) => {
+            loadUsersData({ keyword, page: 1 });
+        }, 350);
+
         document.addEventListener('DOMContentLoaded', () => {
-            renderTable(currentData);
-            
-            // 添加页面可见性检测，确保页面切换时重新渲染
-            document.addEventListener('visibilitychange', function() {
-                if (!document.hidden && typeof renderTable === 'function') {
-                    setTimeout(() => {
-                        renderTable(currentData);
-                    }, 50);
+            bindInteractions();
+            bindFormHandlers();
+            loadUsersData();
+            initializeTableScroll();
+
+            document.addEventListener('visibilitychange', () => {
+                if (!document.hidden) {
+                    loadUsersData({ page: state.currentPage });
                 }
             });
-            
-            // 添加窗口聚焦检测，确保从其他标签页切换回来时重新渲染
-            window.addEventListener('focus', function() {
-                if (typeof renderTable === 'function') {
-                    setTimeout(() => {
-                        renderTable(currentData);
-                    }, 50);
-                }
+
+            window.addEventListener('focus', () => {
+                loadUsersData({ page: state.currentPage });
+            });
+
+            window.addEventListener('resize', () => {
+                setTimeout(checkTableOverflow, 120);
             });
         });
 
-        // 渲染表格
-        function renderTable(data) {
-            const tbody = document.getElementById('tableBody');
-            if (!tbody) {
-                console.error('表格主体未找到');
-                return;
-            }
-            
-            tbody.innerHTML = '';
+        function bindInteractions() {
+            const searchInput = document.getElementById('searchInput');
+            const filterStatus = document.getElementById('filterStatus');
+            const filterRole = document.getElementById('filterRole');
+            const filterMembership = document.getElementById('filterMembership');
+            const resetBtn = document.getElementById('btnResetFilters');
+            const refreshBtn = document.getElementById('btnRefresh');
 
-            if (!data || data.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding: 40px; color: #999;">🔍 未找到匹配的用户</td></tr>';
-                return;
+            if (searchInput) {
+                searchInput.addEventListener('input', handleSearch);
             }
 
-            data.forEach(user => {
-                // 状态样式映射
-                let badgeClass = '';
-                let statusText = '';
-                switch(user.status) {
-                    case 'Active': badgeClass = 'status-active'; statusText = '正常'; break;
-                    case 'Inactive': badgeClass = 'status-inactive'; statusText = '停用'; break;
-                    case 'Banned': badgeClass = 'status-banned'; statusText = '封禁'; break;
+            if (filterStatus) {
+                filterStatus.addEventListener('change', (event) => handleFilterChange('status', event.target.value));
+            }
+
+            if (filterRole) {
+                filterRole.addEventListener('change', (event) => handleFilterChange('role', event.target.value));
+            }
+
+            if (filterMembership) {
+                filterMembership.addEventListener('change', (event) => handleFilterChange('membership_type', event.target.value));
+            }
+
+            if (resetBtn) {
+                resetBtn.addEventListener('click', resetFilters);
+            }
+
+            if (refreshBtn) {
+                refreshBtn.addEventListener('click', () => loadUsersData({ page: state.currentPage }));
+            }
+        }
+
+        function bindFormHandlers() {
+            const addForm = document.getElementById('addForm');
+            const editForm = document.getElementById('editForm');
+
+            if (addForm) {
+                addForm.addEventListener('submit', handleAddSubmit);
+            }
+
+            if (editForm) {
+                editForm.addEventListener('submit', handleEditSubmit);
+            }
+        }
+
+        function handleSearch(event) {
+            const keyword = event.target.value.trim();
+            debouncedSearch(keyword);
+        }
+
+        function handleFilterChange(key, value) {
+            state.filters[key] = value;
+            loadUsersData({ page: 1 });
+        }
+
+        function resetFilters() {
+            state.filters = { status: '', role: '', membership_type: '' };
+            state.keyword = '';
+            const searchInput = document.getElementById('searchInput');
+            if (searchInput) searchInput.value = '';
+
+            const filterStatus = document.getElementById('filterStatus');
+            const filterRole = document.getElementById('filterRole');
+            const filterMembership = document.getElementById('filterMembership');
+            if (filterStatus) filterStatus.value = '';
+            if (filterRole) filterRole.value = '';
+            if (filterMembership) filterMembership.value = '';
+
+            loadUsersData({ page: 1 });
+        }
+
+        function buildFiltersPayload() {
+            const payload = {};
+            if (state.keyword) {
+                payload.name = state.keyword;
+            }
+            Object.entries(state.filters).forEach(([key, value]) => {
+                if (value) {
+                    payload[key] = value;
+                }
+            });
+            return payload;
+        }
+
+        function mapUserFromApi(user) {
+            const createdAt = user.created_at || '';
+            const updatedAt = user.updated_at || createdAt;
+            return {
+                id: user.id,
+                username: user.nickname || '未命名用户',
+                email: user.email || '-',
+                phone: user.phone || '',
+                role: user.role || 'user',
+                membership_type: user.membership_type || 'no_membership',
+                status: (user.status || 'inactive').toLowerCase(),
+                createdAtRaw: createdAt ? Date.parse(createdAt) : null,
+                updatedAtRaw: updatedAt ? Date.parse(updatedAt) : null,
+                createdAtDisplay: formatDateShort(createdAt),
+                updatedAtDisplay: formatDateShort(updatedAt),
+                createdAtFull: formatDateLong(createdAt),
+                updatedAtFull: formatDateLong(updatedAt),
+                createdAtSource: createdAt,
+                updatedAtSource: updatedAt
+            };
+        }
+
+        function formatDateShort(value) {
+            if (!value) return '-';
+            const date = new Date(value);
+            if (Number.isNaN(date.getTime())) return '-';
+            return date.toLocaleDateString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit' });
+        }
+
+        function formatDateLong(value) {
+            if (!value) return '-';
+            const date = new Date(value);
+            if (Number.isNaN(date.getTime())) return '-';
+            return date.toLocaleString('zh-CN', { hour12: false });
+        }
+
+        async function loadUsersData(options = {}) {
+            if (state.isLoading) return;
+
+            const keyword = options.keyword !== undefined ? options.keyword : state.keyword;
+            const page = options.page || 1;
+            const pageSize = options.pageSize || state.perPage;
+
+            state.isLoading = true;
+            state.keyword = keyword;
+            state.currentPage = page;
+            state.perPage = pageSize;
+            showLoadingState();
+
+            try {
+                const response = await fetch(API_ENDPOINT, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        filters: buildFiltersPayload(),
+                        pagination: {
+                            page: state.currentPage,
+                            per_page: state.perPage
+                        }
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
                 }
 
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
+                const result = await response.json();
+                if (!result.success) {
+                    throw new Error(result.error || '获取用户数据失败');
+                }
+
+                const pagination = result.data.pagination || {};
+                state.totalPages = Math.max(pagination.total_pages || 1, 1);
+                state.totalCount = pagination.total_count || 0;
+
+                if (state.totalCount > 0 && state.currentPage > state.totalPages) {
+                    state.currentPage = state.totalPages;
+                    state.isLoading = false;
+                    return loadUsersData({ page: state.currentPage });
+                }
+
+                state.users = (result.data.users || []).map(mapUserFromApi);
+                state.currentData = [...state.users];
+                resetSortIcons();
+                renderTable(state.currentData);
+                renderPagination();
+
+                setTimeout(() => {
+                    adjustColumnWidths();
+                    checkTableOverflow();
+                }, 60);
+            } catch (error) {
+                console.error('加载用户数据失败:', error);
+                showErrorState(error.message);
+            } finally {
+                state.isLoading = false;
+            }
+        }
+
+        function showLoadingState() {
+            const tbody = document.getElementById('tableBody');
+            if (!tbody) return;
+            tbody.innerHTML = '<tr><td colspan="9" style="text-align:center; padding: 40px; color: #999; white-space: normal;">🔄 正在加载用户数据...<br><small style="font-size: 0.8rem; margin-top: 8px; display: block;">请稍候，正在从服务器获取最新数据</small></td></tr>';
+        }
+
+        function showErrorState(errorMessage) {
+            const tbody = document.getElementById('tableBody');
+            if (!tbody) return;
+            tbody.innerHTML = `<tr><td colspan="9" style="text-align:center; padding: 40px; color: #e53e3e; white-space: normal;">❌ 加载失败: ${errorMessage}<br><small style="font-size: 0.8rem; margin-top: 8px; display: block;">请检查网络连接或稍后重试</small><br><button onclick="loadUsersData()" style="margin-top: 10px; padding: 8px 16px; background: var(--primary); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 0.9rem;">重新加载</button></td></tr>`;
+        }
+
+        function renderPagination() {
+            const wrapper = document.getElementById('paginationWrapper');
+            if (!wrapper) return;
+
+            const hasData = state.totalCount > 0;
+            const startItem = hasData ? (state.currentPage - 1) * state.perPage + 1 : 0;
+            const endItem = hasData ? Math.min(state.currentPage * state.perPage, state.totalCount) : 0;
+
+            let html = `
+                <div class="pagination-info">
+                    <span>显示 ${hasData ? startItem : 0}-${hasData ? endItem : 0} 条，共 ${state.totalCount} 条记录</span>
+                    <span>第 ${state.currentPage} / ${state.totalPages} 页</span>
+                </div>
+                <div class="pagination-controls">
+                    <button class="pagination-btn" onclick="changePage(${state.currentPage - 1})" ${state.currentPage === 1 ? 'disabled' : ''}>上一页</button>
+            `;
+
+            const maxVisiblePages = 5;
+            let startPage = Math.max(1, state.currentPage - Math.floor(maxVisiblePages / 2));
+            let endPage = Math.min(state.totalPages, startPage + maxVisiblePages - 1);
+
+            if (endPage - startPage < maxVisiblePages - 1) {
+                startPage = Math.max(1, endPage - maxVisiblePages + 1);
+            }
+
+            if (startPage > 1) {
+                html += `<button class="pagination-btn ${state.currentPage === 1 ? 'active' : ''}" onclick="changePage(1)">1</button>`;
+                if (startPage > 2) {
+                    html += `<span class="pagination-ellipsis" style="padding: 0 4px;">...</span>`;
+                }
+            }
+
+            for (let page = startPage; page <= endPage; page++) {
+                html += `<button class="pagination-btn ${page === state.currentPage ? 'active' : ''}" onclick="changePage(${page})">${page}</button>`;
+            }
+
+            if (endPage < state.totalPages) {
+                if (endPage < state.totalPages - 1) {
+                    html += `<span class="pagination-ellipsis" style="padding: 0 4px;">...</span>`;
+                }
+                html += `<button class="pagination-btn ${state.currentPage === state.totalPages ? 'active' : ''}" onclick="changePage(${state.totalPages})">${state.totalPages}</button>`;
+            }
+
+            html += `
+                    <button class="pagination-btn" onclick="changePage(${state.currentPage + 1})" ${state.currentPage === state.totalPages ? 'disabled' : ''}>下一页</button>
+                    <select class="page-size-selector" onchange="changePageSize(this.value)">
+                        <option value="10" ${state.perPage === 10 ? 'selected' : ''}>10条/页</option>
+                        <option value="20" ${state.perPage === 20 ? 'selected' : ''}>20条/页</option>
+                        <option value="50" ${state.perPage === 50 ? 'selected' : ''}>50条/页</option>
+                        <option value="100" ${state.perPage === 100 ? 'selected' : ''}>100条/页</option>
+                    </select>
+                </div>
+            `;
+
+            wrapper.innerHTML = html;
+        }
+
+        function changePage(page) {
+            if (page < 1 || page > state.totalPages || page === state.currentPage) return;
+            loadUsersData({ page });
+        }
+
+        function changePageSize(value) {
+            const size = Math.min(Math.max(parseInt(value, 10) || 20, 1), 100);
+            loadUsersData({ page: 1, pageSize: size });
+        }
+
+        function renderTable(data) {
+            const tbody = document.getElementById('tableBody');
+            if (!tbody) return;
+
+            if (!data || data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="9" style="text-align:center; padding: 40px; color: #999; white-space: normal;">🔍 未找到匹配的用户<br><small style="font-size: 0.8rem; margin-top: 8px; display: block;">请尝试调整搜索条件或清除搜索关键词</small></td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = '';
+            data.forEach((user) => {
+                const safeName = user.username || '未命名用户';
+                const avatarText = safeName.trim().charAt(0).toUpperCase() || 'U';
+                const statusMeta = getStatusMeta(user.status);
+
+                const row = document.createElement('tr');
+                row.innerHTML = `
                     <td>
                         <div class="user-cell">
-                            <div class="avatar">${user.username.charAt(0).toUpperCase()}</div>
-                            <span style="font-weight:600;">${user.username}</span>
+                            <div class="avatar">${avatarText}</div>
+                            <span style="font-weight:600;" title="${safeName}">${optimizeTextDisplay(safeName, 15)}</span>
                         </div>
                     </td>
-                    <td style="color:var(--text-sub);">${user.email}</td>
-                    <td style="font-family:monospace; color:var(--text-sub);">${user.regTime}</td>
+                    <td style="color:var(--text-sub);" title="${user.email}">${optimizeTextDisplay(user.email, 25)}</td>
+                    <td style="color:var(--text-sub);" title="${user.phone}">${user.phone ? optimizeTextDisplay(user.phone, 15) : '-'}</td>
                     <td>
-                        <span class="badge ${badgeClass}">
-                            <span class="dot"></span>${statusText}
+                        <span class="role-badge ${user.role === 'admin' ? 'role-admin' : 'role-user'}" title="${user.role === 'admin' ? '管理员' : '普通用户'}">
+                            ${user.role === 'admin' ? '管理员' : '普通用户'}
                         </span>
                     </td>
                     <td>
-                        <button class="btn-action btn-edit" onclick="openEdit(${user.id})">编辑</button>
-                        <button class="btn-action btn-del" onclick="deleteUser(${user.id})">删除</button>
+                        <span class="membership-badge membership-${user.membership_type}" title="${getMembershipText(user.membership_type)}">
+                            ${getMembershipText(user.membership_type)}
+                        </span>
+                    </td>
+                    <td style="font-family:monospace; color:var(--text-sub);" title="${user.createdAtFull}">${user.createdAtDisplay}</td>
+                    <td style="font-family:monospace; color:var(--text-sub);" title="${user.updatedAtFull}">${user.updatedAtDisplay}</td>
+                    <td>
+                        <span class="badge ${statusMeta.cssClass}" title="${statusMeta.text}">
+                            <span class="dot"></span>${statusMeta.text}
+                        </span>
+                    </td>
+                    <td>
+                        <button class="btn-action btn-edit" onclick="openEdit(${user.id})" title="编辑用户">编辑</button>
+                        <button class="btn-action btn-del" onclick="deleteUser(${user.id})" title="删除用户">删除</button>
                     </td>
                 `;
-                tbody.appendChild(tr);
+                tbody.appendChild(row);
             });
         }
 
-        // 搜索功能
-        function handleSearch() {
-            const keyword = document.getElementById('searchInput').value.toLowerCase();
-            currentData = users.filter(u => u.username.toLowerCase().includes(keyword));
-            
-            // 搜索后，如果之前有排序，重新应用排序逻辑
-            // (这里简化处理，搜索后暂时按默认显示，或者你可以记录当前激活的sortKey重新排序)
-            renderTable(currentData);
+        function optimizeTextDisplay(text, maxLength = 50) {
+            if (!text) return '-';
+            return text.length <= maxLength ? text : `${text.substring(0, maxLength)}...`;
         }
 
-        // 排序功能 (独立状态)
+        function getStatusMeta(status) {
+            const normalized = (status || 'inactive').toLowerCase();
+            if (normalized === 'active') return { cssClass: 'status-active', text: '正常' };
+            if (normalized === 'inactive') return { cssClass: 'status-inactive', text: '停用' };
+            return { cssClass: 'status-banned', text: '封禁' };
+        }
+
+        function getMembershipText(value) {
+            return MEMBERSHIP_TEXT[value] || '未知';
+        }
+
         function sortTable(key) {
-            // 1. 获取该列当前状态并反转
-            let currentDir = sortStates[key];
-            let newDir = (currentDir === 'asc') ? 'desc' : 'asc';
-            
-            // 2. 更新状态
-            sortStates[key] = newDir;
+            const currentState = state.sortStates[key] || 'none';
+            const nextState = currentState === 'asc' ? 'desc' : 'asc';
+            state.sortStates[key] = nextState;
+            updateSortIcons(key);
 
-            // 3. 更新图标 (仅更新被点击的那一列，不重置其他列图标)
-            const icon = document.getElementById(`icon-${key}`);
-            icon.innerText = newDir === 'asc' ? '↑' : '↓';
+            state.currentData.sort((a, b) => {
+                let aValue;
+                let bValue;
 
-            // 4. 执行排序
-            currentData.sort((a, b) => {
-                if (a[key] < b[key]) return newDir === 'asc' ? -1 : 1;
-                if (a[key] > b[key]) return newDir === 'asc' ? 1 : -1;
+                switch (key) {
+                    case 'username':
+                        aValue = (a.username || '').toLowerCase();
+                        bValue = (b.username || '').toLowerCase();
+                        break;
+                    case 'phone':
+                        aValue = a.phone || '';
+                        bValue = b.phone || '';
+                        break;
+                    case 'role':
+                        const roleOrder = { admin: 0, user: 1 };
+                        aValue = roleOrder[a.role] ?? 2;
+                        bValue = roleOrder[b.role] ?? 2;
+                        break;
+                    case 'membership_type':
+                        const membershipOrder = { annual_card: 0, monthly_card: 1, session_card: 2, no_membership: 3 };
+                        aValue = membershipOrder[a.membership_type] ?? 4;
+                        bValue = membershipOrder[b.membership_type] ?? 4;
+                        break;
+                    case 'regTime':
+                        aValue = a.createdAtRaw || 0;
+                        bValue = b.createdAtRaw || 0;
+                        break;
+                    case 'updatedAt':
+                        aValue = a.updatedAtRaw || 0;
+                        bValue = b.updatedAtRaw || 0;
+                        break;
+                    default:
+                        aValue = a[key];
+                        bValue = b[key];
+                }
+
+                if (aValue < bValue) return nextState === 'asc' ? -1 : 1;
+                if (aValue > bValue) return nextState === 'asc' ? 1 : -1;
                 return 0;
             });
-            renderTable(currentData);
+
+            renderTable(state.currentData);
         }
 
-        // 删除功能
-        function deleteUser(id) {
-            if (confirm('确定要删除此用户吗？操作不可恢复。')) {
-                users = users.filter(u => u.id !== id);
-                handleSearch(); // 刷新视图
+        function updateSortIcons(activeKey) {
+            Object.keys(state.sortStates).forEach((key) => {
+                const icon = document.getElementById(`icon-${key}`);
+                if (!icon) return;
+
+                if (key === activeKey) {
+                    icon.textContent = SORT_ICONS[state.sortStates[key]];
+                    icon.classList.toggle('active', state.sortStates[key] !== 'none');
+                } else {
+                    state.sortStates[key] = 'none';
+                    icon.textContent = SORT_ICONS.none;
+                    icon.classList.remove('active');
+                }
+            });
+        }
+
+        function resetSortIcons() {
+            Object.keys(state.sortStates).forEach((key) => {
+                state.sortStates[key] = 'none';
+                const icon = document.getElementById(`icon-${key}`);
+                if (icon) {
+                    icon.textContent = SORT_ICONS.none;
+                    icon.classList.remove('active');
+                }
+            });
+        }
+
+        function initializeTableScroll() {
+            const scrollContainer = document.getElementById('tableScrollContainer');
+            if (!scrollContainer) return;
+
+            if (!state.scrollInitialized) {
+                const scrollIndicator = document.getElementById('scrollIndicator');
+                scrollContainer.addEventListener('scroll', () => {
+                    if (!scrollIndicator) return;
+                    const maxScroll = scrollContainer.scrollWidth - scrollContainer.clientWidth;
+                    if (maxScroll <= 10) {
+                        scrollIndicator.classList.remove('show');
+                        return;
+                    }
+
+                    scrollIndicator.classList.add('show');
+                    if (scrollContainer.scrollLeft < 50) {
+                        scrollIndicator.textContent = '→ 横向滚动查看更多';
+                    } else if (scrollContainer.scrollLeft > maxScroll - 50) {
+                        scrollIndicator.textContent = '← 已滚动到最右侧';
+                    } else {
+                        scrollIndicator.textContent = '← → 继续滚动查看更多';
+                    }
+                });
+                state.scrollInitialized = true;
             }
+
+            setTimeout(checkTableOverflow, 80);
         }
 
-        /* -------- 模态框通用逻辑 -------- */
-        function closeModal(modalId) {
-            document.getElementById(modalId).classList.remove('show');
+        function checkTableOverflow() {
+            const scrollContainer = document.getElementById('tableScrollContainer');
+            const scrollIndicator = document.getElementById('scrollIndicator');
+            if (!scrollContainer || !scrollIndicator) return;
+
+            const hasOverflow = scrollContainer.scrollWidth > scrollContainer.clientWidth;
+            scrollIndicator.classList.toggle('show', hasOverflow);
         }
 
-        // 点击遮罩层关闭
-        window.onclick = function(e) {
-            if (e.target.classList.contains('modal-overlay')) {
-                e.target.classList.remove('show');
-            }
+        function adjustColumnWidths() {
+            const table = document.getElementById('userTable');
+            if (!table) return;
+
+            const headerCells = Array.from(table.querySelectorAll('thead th'));
+            const rows = Array.from(table.querySelectorAll('tbody tr'));
+            if (!rows.length) return;
+
+            const maxWidths = new Array(headerCells.length).fill(0);
+            headerCells.forEach((cell, index) => {
+                maxWidths[index] = Math.max(maxWidths[index], cell.textContent.trim().length * 8 + 20);
+            });
+
+            rows.forEach((row) => {
+                Array.from(row.children).forEach((cell, index) => {
+                    const contentLength = cell.textContent.trim().length * 8 + 40;
+                    maxWidths[index] = Math.max(maxWidths[index], contentLength);
+                });
+            });
+
+            headerCells.forEach((cell, index) => {
+                const style = getComputedStyle(cell);
+                const minWidth = parseInt(style.minWidth, 10) || 80;
+                const maxWidth = parseInt(style.maxWidth, 10) || 300;
+                const optimal = Math.min(Math.max(maxWidths[index], minWidth), maxWidth);
+                cell.style.width = `${optimal}px`;
+                cell.style.minWidth = `${optimal}px`;
+            });
         }
 
-        /* -------- 新增用户逻辑 -------- */
+        function refreshLocalPagination() {
+            state.totalCount = state.currentData.length;
+            state.totalPages = Math.max(1, Math.ceil(state.totalCount / state.perPage));
+            state.currentPage = Math.min(state.currentPage, state.totalPages);
+        }
+
+        async function deleteUser(id) {
+            if (!confirm('确定要删除此用户吗？操作不可恢复。')) return;
+
+            state.users = state.users.filter((user) => user.id !== id);
+            state.currentData = state.currentData.filter((user) => user.id !== id);
+            refreshLocalPagination();
+            renderTable(state.currentData);
+            renderPagination();
+            alert('🗑️ 用户删除成功！（示例数据未同步至后端）');
+        }
+
         function openAddModal() {
-            document.getElementById('addForm').reset();
+            const form = document.getElementById('addForm');
+            if (form) form.reset();
             document.getElementById('addModal').classList.add('show');
         }
 
-        document.getElementById('addForm').addEventListener('submit', (e) => {
-            e.preventDefault();
-            
-            const newUser = {
-                id: Date.now(), // 简单生成ID
-                username: document.getElementById('addUsername').value,
-                email: document.getElementById('addEmail').value,
-                status: document.getElementById('addStatus').value,
-                regTime: new Date().toISOString().split('T')[0] // 当前日期 YYYY-MM-DD
-            };
-
-            // 添加到数据源头部
-            users.unshift(newUser);
-            
-            closeModal('addModal');
-            handleSearch(); // 刷新表格
-            alert('🎉 新用户添加成功！');
-        });
-
-        /* -------- 编辑用户逻辑 -------- */
         function openEdit(id) {
-            const user = users.find(u => u.id === id);
+            const user = state.users.find((item) => item.id === id);
             if (!user) return;
 
             document.getElementById('editId').value = user.id;
             document.getElementById('editUsername').value = user.username;
             document.getElementById('editEmail').value = user.email;
-            document.getElementById('editStatus').value = user.status;
+            document.getElementById('editPhone').value = user.phone || '';
+            document.getElementById('editRole').value = user.role || 'user';
+            document.getElementById('editMembership').value = user.membership_type || 'no_membership';
+            const statusValue = user.status === 'active' ? 'Active' : user.status === 'inactive' ? 'Inactive' : 'Banned';
+            document.getElementById('editStatus').value = statusValue;
 
             document.getElementById('editModal').classList.add('show');
         }
 
-        document.getElementById('editForm').addEventListener('submit', (e) => {
-            e.preventDefault();
-            const id = parseInt(document.getElementById('editId').value);
-            const index = users.findIndex(u => u.id === id);
+        function closeModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.classList.remove('show');
+            }
+        }
 
-            if (index !== -1) {
-                users[index].username = document.getElementById('editUsername').value;
-                users[index].email = document.getElementById('editEmail').value;
-                users[index].status = document.getElementById('editStatus').value;
+        async function handleAddSubmit(event) {
+            event.preventDefault();
+            const submitButton = event.target.querySelector('.btn-submit');
+            const originalText = submitButton.textContent;
+            submitButton.textContent = '添加中...';
+            submitButton.disabled = true;
+
+            try {
+                const now = new Date().toISOString();
+                const newUser = mapUserFromApi({
+                    id: Date.now(),
+                    nickname: document.getElementById('addUsername').value,
+                    email: document.getElementById('addEmail').value,
+                    phone: '138' + Math.floor(Math.random() * 100000000).toString().padStart(8, '0'),
+                    role: 'user',
+                    membership_type: 'no_membership',
+                    status: document.getElementById('addStatus').value.toLowerCase(),
+                    created_at: now,
+                    updated_at: now
+                });
+
+                state.currentPage = 1;
+                state.users.unshift(newUser);
+                state.currentData.unshift(newUser);
+                refreshLocalPagination();
+                renderTable(state.currentData);
+                renderPagination();
+
+                closeModal('addModal');
+                alert('🎉 新用户添加成功！（示例数据未同步至后端）');
+            } catch (error) {
+                console.error('添加用户失败:', error);
+                alert('❌ 添加用户失败，请稍后重试');
+            } finally {
+                submitButton.textContent = originalText;
+                submitButton.disabled = false;
+            }
+        }
+
+        async function handleEditSubmit(event) {
+            event.preventDefault();
+            const submitButton = event.target.querySelector('.btn-submit');
+            const originalText = submitButton.textContent;
+            submitButton.textContent = '保存中...';
+            submitButton.disabled = true;
+
+            try {
+                const id = parseInt(document.getElementById('editId').value, 10);
+                const index = state.users.findIndex((user) => user.id === id);
+                if (index === -1) {
+                    throw new Error('未找到该用户');
+                }
+
+                const existing = state.users[index];
+                const now = new Date().toISOString();
+                const updatedUser = mapUserFromApi({
+                    id: existing.id,
+                    nickname: document.getElementById('editUsername').value,
+                    email: document.getElementById('editEmail').value,
+                    phone: document.getElementById('editPhone').value,
+                    role: document.getElementById('editRole').value,
+                    membership_type: document.getElementById('editMembership').value,
+                    status: document.getElementById('editStatus').value.toLowerCase(),
+                    created_at: existing.createdAtSource,
+                    updated_at: now
+                });
+
+                state.users[index] = updatedUser;
+                state.currentData = state.currentData.map((user) => (user.id === id ? updatedUser : user));
+                renderTable(state.currentData);
 
                 closeModal('editModal');
-                handleSearch();
+                alert('✅ 用户信息更新成功！（示例数据未同步至后端）');
+            } catch (error) {
+                console.error('更新用户失败:', error);
+                alert('❌ 更新用户失败，请稍后重试');
+            } finally {
+                submitButton.textContent = originalText;
+                submitButton.disabled = false;
+            }
+        }
+
+        window.addEventListener('click', (event) => {
+            if (event.target.classList && event.target.classList.contains('modal-overlay')) {
+                event.target.classList.remove('show');
             }
         });
-
     </script>
 </body>
 </html>
