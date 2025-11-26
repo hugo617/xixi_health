@@ -18,6 +18,9 @@ Rails.application.routes.draw do
       post 'users/update', to: 'users#update'
       # 用户删除接口
       post 'users/delete', to: 'users#delete'
+      
+      # 报告搜索接口
+      post 'reports/search', to: 'reports#search'
     end
   end
   
