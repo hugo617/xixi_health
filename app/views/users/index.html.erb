@@ -119,26 +119,64 @@
             margin-top: 4px;
         }
 
-        /* 新增用户按钮 */
+        /* 新增用户按钮 - 优化版 */
         .btn-add {
-            background: var(--text-main);
+            background: linear-gradient(135deg, var(--primary), var(--primary-hover));
             color: white;
             border: none;
-            padding: 12px 24px;
-            border-radius: 12px;
+            padding: 14px 28px;
+            border-radius: 16px;
             font-weight: 600;
-            font-size: 0.95rem;
+            font-size: 1rem;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             display: flex;
             align-items: center;
-            gap: 8px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            gap: 10px;
+            box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
+            position: relative;
+            overflow: hidden;
         }
         .btn-add:hover {
-            background: #000;
-            transform: translateY(-2px);
-            box-shadow: 0 8px 12px rgba(0,0,0,0.15);
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 12px 30px rgba(16, 185, 129, 0.4);
+        }
+        .btn-add:active {
+            transform: translateY(-1px) scale(0.98);
+        }
+        .btn-add::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.6s;
+        }
+        .btn-add:hover::before {
+            left: 100%;
+        }
+        .btn-add svg {
+            width: 22px;
+            height: 22px;
+            transition: transform 0.3s;
+        }
+        .btn-add:hover svg {
+            transform: rotate(90deg) scale(1.1);
+        }
+        
+        /* 新增用户按钮动画 */
+        @keyframes pulse {
+            0% { box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3); }
+            50% { box-shadow: 0 8px 30px rgba(16, 185, 129, 0.5); }
+            100% { box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3); }
+        }
+        .btn-add {
+            animation: pulse 2s infinite;
+        }
+        .btn-add:hover {
+            animation: none;
         }
 
         /* ---------------- 功能栏 (搜索) ---------------- */
@@ -844,47 +882,384 @@
             border-color: var(--primary);
         }
 
-        /* ---------------- 模态框 (新增/编辑) ---------------- */
+        /* ---------------- 模态框 (新增/编辑) - 优化版 ---------------- */
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.3);
-            backdrop-filter: blur(8px); /* 模糊背景 */
+            background: rgba(0,0,0,0.4);
+            backdrop-filter: blur(12px); /* 增强模糊效果 */
+            -webkit-backdrop-filter: blur(12px);
             z-index: 100;
             display: none;
             justify-content: center;
             align-items: center;
             opacity: 0;
-            transition: opacity 0.3s;
+            transition: opacity 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
         .modal-overlay.show { display: flex; opacity: 1; }
 
         .modal-card {
-            background: white;
+            background: var(--glass-bg);
+            backdrop-filter: blur(var(--glass-blur));
+            -webkit-backdrop-filter: blur(var(--glass-blur));
             width: 100%;
-            max-width: 420px;
-            border-radius: 20px;
-            padding: 30px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-            transform: scale(0.95);
-            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            max-width: 500px; /* 增加最大宽度 */
+            max-height: 90vh; /* 限制最大高度 */
+            border-radius: 24px;
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.25), inset 0 0 0 1px rgba(255,255,255,0.6);
+            transform: scale(0.9) translateY(20px);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            overflow: hidden; /* 防止内容溢出 */
         }
-        .modal-overlay.show .modal-card { transform: scale(1); }
+        .modal-overlay.show .modal-card { 
+            transform: scale(1) translateY(0); 
+        }
 
-        .modal-header h2 { margin-bottom: 20px; font-size: 1.5rem; color: #111827; }
+        .modal-header {
+            padding: 32px 32px 24px;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+            position: relative;
+        }
+        .modal-header h2 { 
+            font-size: 1.75rem; 
+            color: #111827; 
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .modal-header h2::before {
+            content: '👤';
+            font-size: 1.8rem;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+        }
 
-        .form-group { margin-bottom: 20px; }
-        .form-label { display: block; margin-bottom: 8px; font-size: 0.9rem; font-weight: 500; color: var(--text-sub); }
+        /* 模态框内容区域 - 可滚动 */
+        .modal-content {
+            padding: 32px;
+            max-height: calc(90vh - 200px); /* 动态计算最大高度 */
+            overflow-y: auto; /* 启用垂直滚动 */
+            scrollbar-width: thin; /* Firefox */
+            scrollbar-color: var(--primary) transparent; /* Firefox */
+        }
+        .modal-content::-webkit-scrollbar {
+            width: 6px;
+        }
+        .modal-content::-webkit-scrollbar-track {
+            background: rgba(16, 185, 129, 0.05);
+            border-radius: 3px;
+        }
+        .modal-content::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 3px;
+        }
+
+        .form-group { 
+            margin-bottom: 24px; 
+            position: relative;
+        }
+        .form-label { 
+            display: block; 
+            margin-bottom: 10px; 
+            font-size: 0.95rem; 
+            font-weight: 600; 
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
         .form-input {
-            width: 100%; padding: 12px;
-            border: 2px solid #e5e7eb; border-radius: 10px;
-            font-size: 1rem; outline: none; transition: 0.2s;
+            width: 100%; 
+            padding: 14px 16px;
+            border: 2px solid #e5e7eb; 
+            border-radius: 12px;
+            font-size: 1rem; 
+            outline: none; 
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
         }
-        .form-input:focus { border-color: var(--primary); }
+        .form-input:focus { 
+            border-color: var(--primary); 
+            box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.15);
+            transform: translateY(-1px);
+        }
+        .form-input:invalid { border-color: #ef4444; }
+        .form-input:valid { border-color: #10b981; }
 
-        .modal-footer { display: flex; justify-content: flex-end; gap: 12px; margin-top: 25px; }
-        .btn-cancel { background: #f3f4f6; color: #4b5563; border: none; padding: 10px 20px; border-radius: 10px; cursor: pointer; font-weight: 500; }
-        .btn-submit { background: var(--primary); color: white; border: none; padding: 10px 24px; border-radius: 10px; cursor: pointer; font-weight: 600; }
-        .btn-submit:hover { background: var(--primary-hover); }
+        .modal-footer { 
+            padding: 24px 32px 32px;
+            display: flex; 
+            justify-content: flex-end; 
+            gap: 16px; 
+            background: rgba(255, 255, 255, 0.4);
+            border-top: 1px solid rgba(0,0,0,0.05);
+        }
+        .btn-cancel { 
+            background: rgba(243, 244, 246, 0.8); 
+            color: #4b5563; 
+            border: 1px solid #e5e7eb; 
+            padding: 12px 24px; 
+            border-radius: 12px; 
+            cursor: pointer; 
+            font-weight: 500; 
+            transition: all 0.2s;
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+        }
+        .btn-cancel:hover { 
+            background: rgba(229, 231, 235, 0.9); 
+            border-color: #d1d5db;
+            transform: translateY(-1px);
+        }
+        .btn-submit { 
+            background: linear-gradient(135deg, var(--primary), var(--primary-hover)); 
+            color: white; 
+            border: none; 
+            padding: 12px 28px; 
+            border-radius: 12px; 
+            cursor: pointer; 
+            font-weight: 600; 
+            transition: all 0.2s;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        .btn-submit:hover { 
+            transform: translateY(-2px); 
+            box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
+        }
+        .btn-submit:active { 
+            transform: translateY(0); 
+        }
+        
+        /* 增强的表单验证样式 */
+        .form-group .error-message {
+            color: #ef4444;
+            font-size: 0.85rem;
+            margin-top: 6px;
+            display: none;
+            font-weight: 500;
+            padding-left: 4px;
+        }
+        .form-group.has-error .error-message {
+            display: block;
+        }
+        .form-group.has-error .form-input {
+            border-color: #ef4444;
+            background: rgba(254, 226, 226, 0.3);
+        }
+        
+        /* 必填字段指示器 */
+        .required-indicator {
+            color: #ef4444;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+        
+        /* 帮助文本样式 */
+        .form-help {
+            color: var(--text-sub);
+            font-size: 0.8rem;
+            margin-top: 6px;
+            display: block;
+            font-weight: 400;
+        }
+        
+        /* 表单区域样式 */
+        .form-section {
+            margin-bottom: 32px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid rgba(0,0,0,0.06);
+        }
+        .form-section:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-main);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .section-title::before {
+            content: '';
+            width: 4px;
+            height: 20px;
+            background: var(--primary);
+            border-radius: 2px;
+        }
+        
+        /* 响应式表单布局 */
+        @media (max-width: 640px) {
+            .modal-card {
+                max-width: 95vw;
+                margin: 0 16px;
+            }
+            .modal-header,
+            .modal-content,
+            .modal-footer {
+                padding: 24px;
+            }
+            .form-group {
+                margin-bottom: 20px;
+            }
+        }
+        
+        /* 加载状态增强 */
+        .btn-submit.loading {
+            position: relative;
+            color: transparent;
+        }
+        .btn-submit.loading::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 20px;
+            height: 20px;
+            margin: -10px 0 0 -10px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top: 2px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* 成功状态样式 */
+        .form-group.success .form-input {
+            border-color: #10b981;
+            background: rgba(16, 185, 129, 0.05);
+        }
+        
+        /* 表单输入增强 */
+        .form-input::placeholder {
+            color: #9ca3af;
+            font-weight: 400;
+        }
+        
+        /* 选择框增强 */
+        .form-input:focus {
+            background: rgba(255, 255, 255, 0.8);
+        }
+        
+        /* 按钮组增强 */
+        .modal-footer {
+            gap: 12px;
+        }
+        
+        /* 确保按钮可点击且可见 */
+        .btn-submit {
+            cursor: pointer !important;
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+        }
+        
+        .btn-submit:hover {
+            cursor: pointer;
+        }
+        
+        .btn-submit:disabled {
+            cursor: not-allowed !important;
+            opacity: 0.6;
+        }
+        
+        /* 按钮点击反馈 */
+        .btn-submit:active {
+            transform: translateY(1px) !important;
+        }
+        
+        @media (max-width: 480px) {
+            .modal-footer {
+                flex-direction: column;
+            }
+            .btn-cancel,
+            .btn-submit {
+                width: 100%;
+            }
+        }
+        
+        /* 密码强度指示器 */
+        .password-strength {
+            margin-top: 8px;
+        }
+        
+        /* 表单输入增强动画 */
+        .form-input {
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        
+        /* 成功状态动画 */
+        .form-group.success .form-input {
+            border-color: #10b981;
+            background: rgba(16, 185, 129, 0.05);
+            animation: successPulse 0.5s ease;
+        }
+        
+        @keyframes successPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+            100% { transform: scale(1); }
+        }
+        
+        /* 错误状态动画 */
+        .form-group.has-error .form-input {
+            animation: errorShake 0.4s ease;
+        }
+        
+        @keyframes errorShake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-4px); }
+            75% { transform: translateX(4px); }
+        }
+        
+        /* 模态框标题动画 */
+        .modal-header h2 {
+            animation: slideInLeft 0.5s ease-out;
+        }
+        
+        @keyframes slideInLeft {
+            0% { 
+                opacity: 0; 
+                transform: translateX(-20px); 
+            }
+            100% { 
+                opacity: 1; 
+                transform: translateX(0); 
+            }
+        }
+        
+        /* 表单区域动画 */
+        .form-section {
+            animation: fadeInUp 0.6s ease-out;
+            animation-fill-mode: both;
+        }
+        
+        .form-section:nth-child(1) { animation-delay: 0.1s; }
+        .form-section:nth-child(2) { animation-delay: 0.2s; }
+        .form-section:nth-child(3) { animation-delay: 0.3s; }
+        
+        @keyframes fadeInUp {
+            0% { 
+                opacity: 0; 
+                transform: translateY(20px); 
+            }
+            100% { 
+                opacity: 1; 
+                transform: translateY(0); 
+            }
+        }
 
     </style>
 </head>
@@ -1016,33 +1391,85 @@
         </div>
     </div>
 
-    <!-- 1. 新增用户模态框 -->
+    <!-- 1. 新增用户模态框 - 优化版 -->
     <div class="modal-overlay" id="addModal">
         <div class="modal-card">
             <div class="modal-header">
-                <h2>👤 添加新用户</h2>
+                <h2>添加新用户</h2>
             </div>
-            <form id="addForm">
-                <div class="form-group">
-                    <label class="form-label">用户名</label>
-                    <input type="text" id="addUsername" class="form-input" placeholder="例如: PandaUser" required>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">邮箱</label>
-                    <input type="email" id="addEmail" class="form-input" placeholder="user@example.com" required>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">初始状态</label>
-                    <select id="addStatus" class="form-input">
-                        <option value="Active">正常 (Active)</option>
-                        <option value="Inactive">停用 (Inactive)</option>
-                    </select>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn-cancel" onclick="closeModal('addModal')">取消</button>
-                    <button type="submit" class="btn-submit">确认添加</button>
-                </div>
-            </form>
+            <div class="modal-content">
+                <form id="addForm">
+                    <!-- 基本信息区域 -->
+                    <div class="form-section">
+                        <h3 class="section-title">基本信息</h3>
+                        <div class="form-group">
+                            <label class="form-label">用户名 <span class="required-indicator">*</span></label>
+                            <input type="text" id="addUsername" class="form-input" placeholder="例如: PandaUser" required minlength="2" maxlength="50">
+                            <small class="form-help">2-50个字符，支持中文、英文、数字</small>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">邮箱 <span class="required-indicator">*</span></label>
+                            <input type="email" id="addEmail" class="form-input" placeholder="user@example.com" required>
+                            <small class="form-help">请输入有效的邮箱地址，用于登录和通知</small>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">手机号 <span class="required-indicator">*</span></label>
+                            <input type="tel" id="addPhone" class="form-input" placeholder="13800138000" required pattern="1[3-9]\d{9}">
+                            <small class="form-help">中国手机号格式，11位数字</small>
+                        </div>
+                    </div>
+
+                    <!-- 安全信息区域 -->
+                    <div class="form-section">
+                        <h3 class="section-title">安全信息</h3>
+                        <div class="form-group">
+                            <label class="form-label">密码 <span class="required-indicator">*</span></label>
+                            <input type="password" id="addPassword" class="form-input" placeholder="输入密码" required minlength="6">
+                            <small class="form-help">最少6位字符，建议包含字母和数字</small>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">确认密码</label>
+                            <input type="password" id="addPasswordConfirmation" class="form-input" placeholder="再次输入密码">
+                            <small class="form-help">请再次输入密码以确认</small>
+                        </div>
+                    </div>
+
+                    <!-- 权限设置区域 -->
+                    <div class="form-section">
+                        <h3 class="section-title">权限设置</h3>
+                        <div class="form-group">
+                            <label class="form-label">用户角色</label>
+                            <select id="addRole" class="form-input">
+                                <option value="user">普通用户 - 基础功能权限</option>
+                                <option value="admin">管理员 - 全部功能权限</option>
+                            </select>
+                            <small class="form-help">角色决定用户的系统权限范围</small>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">会员类型</label>
+                            <select id="addMembership" class="form-input">
+                                <option value="no_membership">无会员</option>
+                                <option value="session_card">次卡 - 按次数计费</option>
+                                <option value="monthly_card">月卡 - 月度会员</option>
+                                <option value="annual_card">年卡 - 年度会员</option>
+                            </select>
+                            <small class="form-help">会员类型影响服务使用权限</small>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">初始状态</label>
+                            <select id="addStatus" class="form-input">
+                                <option value="Active">正常 - 账户可以正常使用</option>
+                                <option value="Inactive">停用 - 账户暂时不可用</option>
+                            </select>
+                            <small class="form-help">新创建用户的初始状态设置</small>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-cancel" onclick="closeModal('addModal')">取消</button>
+                <button type="button" class="btn-submit" onclick="submitAddForm()">确认添加</button>
+            </div>
         </div>
     </div>
 
@@ -1180,6 +1607,183 @@
             delete button.dataset.originalDisabled;
         }
 
+        /* 显示表单验证错误 */
+        function showFormError(inputId, message) {
+            const input = document.getElementById(inputId);
+            const formGroup = input.closest('.form-group');
+            if (!formGroup) return;
+
+            // 清除之前的错误
+            const existingError = formGroup.querySelector('.error-message');
+            if (existingError) {
+                existingError.remove();
+            }
+
+            // 创建错误消息元素
+            const errorElement = document.createElement('div');
+            errorElement.className = 'error-message';
+            errorElement.textContent = message;
+
+            // 添加错误样式和消息
+            formGroup.classList.add('has-error');
+            formGroup.classList.remove('success');
+            formGroup.appendChild(errorElement);
+
+            // 添加输入事件监听器来自动清除错误
+            const clearError = function() {
+                formGroup.classList.remove('has-error');
+                errorElement.remove();
+                input.removeEventListener('input', clearError);
+                // 重新验证
+                validateField(inputId);
+            };
+            input.addEventListener('input', clearError);
+        }
+
+        /* 显示表单验证成功 */
+        function showFormSuccess(inputId) {
+            const input = document.getElementById(inputId);
+            const formGroup = input.closest('.form-group');
+            if (!formGroup) return;
+
+            // 清除错误状态
+            formGroup.classList.remove('has-error');
+            const existingError = formGroup.querySelector('.error-message');
+            if (existingError) {
+                existingError.remove();
+            }
+
+            // 添加成功样式
+            formGroup.classList.add('success');
+        }
+
+        /* 验证单个字段 */
+        function validateField(inputId) {
+            const input = document.getElementById(inputId);
+            if (!input) return true; // 如果元素不存在，返回true
+            
+            const value = input.value.trim();
+            let isValid = true;
+
+            switch(inputId) {
+                case 'addUsername':
+                    if (!value || value.length < 2 || value.length > 50) {
+                        showFormError(inputId, '用户名长度必须在2-50个字符之间');
+                        isValid = false;
+                    }
+                    break;
+                case 'addEmail':
+                    if (!value || !value.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+                        showFormError(inputId, '请输入有效的邮箱地址');
+                        isValid = false;
+                    }
+                    break;
+                case 'addPhone':
+                    if (!value || !value.match(/^1[3-9]\d{9}$/)) {
+                        showFormError(inputId, '请输入有效的中国手机号');
+                        isValid = false;
+                    }
+                    break;
+                case 'addPassword':
+                    if (!value || value.length < 6) {
+                        showFormError(inputId, '密码长度不能少于6位');
+                        isValid = false;
+                    }
+                    break;
+                case 'addPasswordConfirmation':
+                    const password = document.getElementById('addPassword').value;
+                    if (value && value !== password) {
+                        showFormError(inputId, '密码确认不匹配');
+                        isValid = false;
+                    }
+                    break;
+            }
+
+            if (isValid) {
+                showFormSuccess(inputId);
+            }
+            return isValid;
+        }
+
+        /* 实时表单验证 */
+        function setupRealTimeValidation() {
+            const formFields = ['addUsername', 'addEmail', 'addPhone', 'addPassword', 'addPasswordConfirmation'];
+            formFields.forEach(fieldId => {
+                const input = document.getElementById(fieldId);
+                if (input) {
+                    // 失去焦点时验证
+                    input.addEventListener('blur', () => validateField(fieldId));
+                    // 输入时清除错误状态
+                    input.addEventListener('input', () => {
+                        const formGroup = input.closest('.form-group');
+                        if (formGroup && formGroup.classList.contains('has-error')) {
+                            formGroup.classList.remove('has-error');
+                            const errorElement = formGroup.querySelector('.error-message');
+                            if (errorElement) {
+                                errorElement.remove();
+                            }
+                        }
+                    });
+                }
+            });
+        }
+
+        /* 增强的密码强度指示器 */
+        function setupPasswordStrength() {
+            const passwordInput = document.getElementById('addPassword');
+            if (!passwordInput) return;
+
+            passwordInput.addEventListener('input', function() {
+                const password = this.value;
+                const formGroup = this.closest('.form-group');
+                
+                // 移除之前的强度指示器
+                const existingStrength = formGroup.querySelector('.password-strength');
+                if (existingStrength) {
+                    existingStrength.remove();
+                }
+
+                if (password.length === 0) return;
+
+                // 计算密码强度
+                let strength = 0;
+                if (password.length >= 6) strength++;
+                if (password.length >= 10) strength++;
+                if (/[a-z]/.test(password) && /[A-Z]/.test(password)) strength++;
+                if (/\d/.test(password)) strength++;
+                if (/[^a-zA-Z\d]/.test(password)) strength++;
+
+                // 创建强度指示器
+                const strengthDiv = document.createElement('div');
+                strengthDiv.className = 'password-strength';
+                
+                const strengthLabels = ['很弱', '弱', '一般', '强', '很强'];
+                const strengthColors = ['#ef4444', '#f59e0b', '#eab308', '#10b981', '#059669'];
+                
+                strengthDiv.innerHTML = `
+                    <div style="display: flex; align-items: center; gap: 8px; margin-top: 6px;">
+                        <div style="flex: 1; height: 4px; background: #e5e7eb; border-radius: 2px; overflow: hidden;">
+                            <div style="height: 100%; width: ${(strength / 5) * 100}%; background: ${strengthColors[strength - 1]}; transition: width 0.3s;"></div>
+                        </div>
+                        <span style="font-size: 0.8rem; color: ${strengthColors[strength - 1]}; font-weight: 500;">${strengthLabels[strength - 1]}</span>
+                    </div>
+                `;
+                
+                formGroup.appendChild(strengthDiv);
+            });
+        }
+
+        /* 清除所有表单错误 */
+        function clearFormErrors() {
+            document.querySelectorAll('.form-group.has-error').forEach(group => {
+                group.classList.remove('has-error');
+                const errorMessage = group.querySelector('.error-message');
+                if (errorMessage) {
+                    errorMessage.remove();
+                }
+            });
+        }
+
         function debounce(fn, delay = 300) {
             let timerId;
             return (...args) => {
@@ -1200,6 +1804,9 @@
             loadUsersData();
             initializeTableScroll();
 
+            // 初始化表单增强功能
+            initializeFormEnhancements();
+
             document.addEventListener('visibilitychange', () => {
                 if (!document.hidden) {
                     loadUsersData({ page: state.currentPage });
@@ -1214,6 +1821,73 @@
                 setTimeout(checkTableOverflow, 120);
             });
         });
+
+        /* 表单增强功能初始化 */
+        function initializeFormEnhancements() {
+            console.log('Initializing form enhancements...');
+            
+            // 为新增用户按钮添加键盘快捷键
+            document.addEventListener('keydown', (e) => {
+                // Ctrl/Cmd + N 打开新增用户模态框
+                if ((e.ctrlKey || e.metaKey) && e.key === 'n') {
+                    e.preventDefault();
+                    openAddModal();
+                }
+                // Esc 关闭模态框
+                if (e.key === 'Escape') {
+                    const openModals = document.querySelectorAll('.modal-overlay.show');
+                    openModals.forEach(modal => {
+                        const modalId = modal.id;
+                        if (modalId) closeModal(modalId);
+                    });
+                }
+            });
+
+            // 测试按钮点击事件
+            document.addEventListener('click', (e) => {
+                if (e.target.classList.contains('btn-submit')) {
+                    console.log('Submit button clicked:', e.target);
+                    console.log('Button text:', e.target.textContent);
+                    console.log('Button type:', e.target.type);
+                    console.log('Button onclick:', e.target.onclick);
+                }
+            });
+
+            // 为模态框内的表单添加回车键提交支持
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && e.target.closest('.modal-content')) {
+                    const submitButton = e.target.closest('.modal-card').querySelector('.btn-submit');
+                    if (submitButton && !submitButton.disabled) {
+                        e.preventDefault();
+                        const form = e.target.closest('form');
+                        if (form && form.checkValidity()) {
+                            form.dispatchEvent(new Event('submit'));
+                        }
+                    }
+                }
+            });
+
+            // 自动聚焦第一个输入框当模态框打开时
+            const observer = new MutationObserver((mutations) => {
+                mutations.forEach((mutation) => {
+                    if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+                        const target = mutation.target;
+                        if (target.classList.contains('show') && target.classList.contains('modal-overlay')) {
+                            setTimeout(() => {
+                                const firstInput = target.querySelector('.form-input');
+                                if (firstInput) {
+                                    firstInput.focus();
+                                }
+                            }, 100);
+                        }
+                    }
+                });
+            });
+
+            document.querySelectorAll('.modal-overlay').forEach(modal => {
+                observer.observe(modal, { attributes: true });
+            });
+        }
 
         function bindInteractions() {
             const searchInput = document.getElementById('searchInput');
@@ -1249,14 +1923,19 @@
         }
 
         function bindFormHandlers() {
+            console.log('Binding form handlers...');
             const addForm = document.getElementById('addForm');
             const editForm = document.getElementById('editForm');
 
             if (addForm) {
+                console.log('Add form found, binding submit event');
                 addForm.addEventListener('submit', handleAddSubmit);
+            } else {
+                console.error('Add form not found');
             }
 
             if (editForm) {
+                console.log('Edit form found, binding submit event');
                 editForm.addEventListener('submit', handleEditSubmit);
             }
         }
@@ -1747,8 +2426,64 @@
 
         function openAddModal() {
             const form = document.getElementById('addForm');
-            if (form) form.reset();
+            if (form) {
+                form.reset();
+                // 清除所有验证状态
+                form.querySelectorAll('.form-group').forEach(group => {
+                    group.classList.remove('has-error', 'success');
+                    const errorElement = group.querySelector('.error-message');
+                    if (errorElement) {
+                        errorElement.remove();
+                    }
+                    const strengthElement = group.querySelector('.password-strength');
+                    if (strengthElement) {
+                        strengthElement.remove();
+                    }
+                });
+            }
+            
+            // 设置实时验证
+            setupRealTimeValidation();
+            
+            // 设置密码强度指示器
+            setupPasswordStrength();
+            
+            // 显示模态框
             document.getElementById('addModal').classList.add('show');
+        }
+
+        /* 处理新增用户表单提交 */
+        function submitAddForm() {
+            console.log('Submit add form clicked');
+            const form = document.getElementById('addForm');
+            if (!form) {
+                console.error('Add form not found');
+                showNotification('❌ 表单未找到', 'error');
+                return;
+            }
+
+            // 检查表单验证
+            if (!form.checkValidity()) {
+                console.log('Form validation failed');
+                form.reportValidity(); // 显示浏览器的默认验证提示
+                return;
+            }
+
+            try {
+                // 手动触发表单的submit事件
+                const event = new Event('submit', { bubbles: true, cancelable: true });
+                const result = form.dispatchEvent(event);
+                
+                console.log('Form submit event dispatched, result:', result);
+                
+                // 如果表单验证失败，result会是false
+                if (!result) {
+                    console.log('Form submission was prevented');
+                }
+            } catch (error) {
+                console.error('Error submitting form:', error);
+                showNotification('❌ 表单提交失败: ' + error.message, 'error');
+            }
         }
 
         function openEdit(id) {
@@ -1782,24 +2517,101 @@
         }
 
         async function handleAddSubmit(event) {
+            console.log('handleAddSubmit called, preventing default...');
+            console.log('Event target:', event.target);
+            console.log('Event type:', event.type);
+            
             event.preventDefault();
-            const submitButton = event.target.querySelector('.btn-submit');
-            showLoading(submitButton, '添加中...');
+            
+            // 获取提交按钮 - 注意：event.target是form元素，不是按钮
+            const form = event.target;
+            const submitButton = form.querySelector('.btn-submit') || document.querySelector('.modal-footer .btn-submit');
+            console.log('Submit button found:', submitButton);
+            
+            // 添加加载状态样式
+            if (submitButton) {
+                submitButton.classList.add('loading');
+                showLoading(submitButton, '创建中...');
+            } else {
+                console.error('Submit button not found!');
+            }
 
             try {
-                const now = new Date().toISOString();
-                const newUser = mapUserFromApi({
-                    id: Date.now(),
-                    nickname: document.getElementById('addUsername').value,
-                    email: document.getElementById('addEmail').value,
-                    phone: '138' + Math.floor(Math.random() * 100000000).toString().padStart(8, '0'),
-                    role: 'user',
-                    membership_type: 'no_membership',
-                    status: document.getElementById('addStatus').value.toLowerCase(),
-                    created_at: now,
-                    updated_at: now
+                // 清除之前的表单错误
+                clearFormErrors();
+
+                // 执行完整的表单验证
+                const formFields = ['addUsername', 'addEmail', 'addPhone', 'addPassword', 'addPasswordConfirmation'];
+                let hasErrors = false;
+
+                formFields.forEach(fieldId => {
+                    if (!validateField(fieldId)) {
+                        hasErrors = true;
+                    }
                 });
 
+                if (hasErrors) {
+                    showNotification('❌ 请检查并修正表单中的错误', 'error', 5000);
+                    return;
+                }
+
+                // 获取表单数据
+                const nickname = document.getElementById('addUsername').value.trim();
+                const email = document.getElementById('addEmail').value.trim();
+                const phone = document.getElementById('addPhone').value.trim();
+                const password = document.getElementById('addPassword').value;
+                const passwordConfirmation = document.getElementById('addPasswordConfirmation').value;
+                const role = document.getElementById('addRole').value;
+                const membershipType = document.getElementById('addMembership').value;
+                const statusValue = document.getElementById('addStatus').value;
+
+                // 准备创建数据
+                const createData = {
+                    user: {
+                        nickname: nickname,
+                        email: email,
+                        phone: phone,
+                        password: password,
+                        password_confirmation: passwordConfirmation || password,
+                        role: role,
+                        membership_type: membershipType,
+                        status: STATUS_MAPPING[statusValue] || statusValue.toLowerCase()
+                    }
+                };
+
+                // 调用后端API创建用户
+                const response = await fetch('/api/v1/users/create', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify(createData)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const result = await response.json();
+                if (!result.success) {
+                    throw new Error(result.error || '创建用户失败');
+                }
+
+                // 创建成功后，将新用户添加到本地状态
+                const newUser = mapUserFromApi({
+                    id: result.data.id,
+                    nickname: result.data.nickname,
+                    email: result.data.email,
+                    phone: result.data.phone,
+                    role: result.data.role,
+                    membership_type: result.data.membership_type,
+                    status: result.data.status,
+                    created_at: result.data.created_at,
+                    updated_at: result.data.updated_at
+                });
+
+                // 更新本地状态并刷新显示
                 state.currentPage = 1;
                 state.users.unshift(newUser);
                 state.currentData.unshift(newUser);
@@ -1807,12 +2619,34 @@
                 renderTable(state.currentData);
                 renderPagination();
 
+                // 显示成功通知
+                showNotification('🎉 新用户创建成功！', 'success', 4000);
+
+                // 关闭模态框并重置表单
                 closeModal('addModal');
-                showNotification('🎉 新用户添加成功！（示例数据未同步至后端）', 'success');
+                const form = document.getElementById('addForm');
+                if (form) {
+                    form.reset();
+                    // 清除所有验证状态
+                    form.querySelectorAll('.form-group').forEach(group => {
+                        group.classList.remove('has-error', 'success');
+                        const errorElement = group.querySelector('.error-message');
+                        if (errorElement) {
+                            errorElement.remove();
+                        }
+                        const strengthElement = group.querySelector('.password-strength');
+                        if (strengthElement) {
+                            strengthElement.remove();
+                        }
+                    });
+                }
+
             } catch (error) {
-                console.error('添加用户失败:', error);
-                showNotification('❌ 添加用户失败，请稍后重试', 'error');
+                console.error('创建用户失败:', error);
+                showNotification(`❌ 创建用户失败: ${error.message}`, 'error', 5000);
             } finally {
+                // 移除加载状态
+                submitButton.classList.remove('loading');
                 hideLoading(submitButton);
             }
         }
