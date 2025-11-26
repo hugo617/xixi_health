@@ -65,6 +65,26 @@ module Api
         render_error("服务器内部错误", :internal_server_error)
       end
 
+      # POST /api/v1/users/create
+      # 用户创建接口
+      # 创建新用户
+      def create
+        result = Users::CreateService.call(create_params)
+        
+        if result[:success]
+          render_success(result[:data], :created)
+        else
+          render_error(result[:error])
+        end
+      rescue ActionController::ParameterMissing => e
+        Rails.logger.error "API Users Create - Parameter error: #{e.message}"
+        render_error("参数错误: #{e.message}", :bad_request)
+      rescue StandardError => e
+        Rails.logger.error "API Users Create - Unexpected error: #{e.class} - #{e.message}"
+        Rails.logger.error e.backtrace.join("\n")
+        render_error("服务器内部错误", :internal_server_error)
+      end
+
       private
 
       # Strong Parameters定义
@@ -90,6 +110,12 @@ module Api
       # @return [Hash] 允许的删除参数
       def delete_params
         params.permit(:user_id).to_h
+      end
+
+      # 用户创建参数
+      # @return [Hash] 允许的创建参数
+      def create_params
+        params.permit(user: [:nickname, :email, :phone, :password, :password_confirmation, :status, :role, :membership_type]).to_h
       end
     end
   end

@@ -12,6 +12,8 @@ Rails.application.routes.draw do
     namespace :v1 do
       # 用户搜索接口
       post 'users/search', to: 'users#search'
+      # 用户创建接口
+      post 'users/create', to: 'users#create'
       # 用户更新接口
       post 'users/update', to: 'users#update'
       # 用户删除接口
