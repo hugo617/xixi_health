@@ -566,6 +566,45 @@
             }
         }
 
+        /* 通知消息样式 */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 16px 24px;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            z-index: 1000;
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+        }
+        
+        .notification.success {
+            background: rgba(220, 252, 231, 0.95);
+            color: #15803d;
+            border: 1px solid rgba(34, 197, 94, 0.2);
+        }
+        
+        .notification.error {
+            background: rgba(254, 226, 226, 0.95);
+            color: #b91c1c;
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+        
+        .notification.info {
+            background: rgba(224, 242, 254, 0.95);
+            color: #1e40af;
+            border: 1px solid rgba(59, 130, 246, 0.2);
+        }
+
         /* 打印样式优化 */
         @media print {
             .table-wrapper {
@@ -696,11 +735,25 @@
             border: 1px solid transparent;
             margin-right: 6px;
             transition: 0.2s;
+            position: relative;
         }
         .btn-edit { background: white; border-color: #e5e7eb; color: var(--text-main); }
         .btn-edit:hover { border-color: var(--primary); color: var(--primary); }
         .btn-del { background: white; border-color: #fca5a5; color: #ef4444; }
         .btn-del:hover { background: #fef2f2; border-color: #ef4444; }
+        
+        /* 按钮禁用状态 */
+        .btn-action:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        /* 操作按钮容器 */
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
 
         /* 排序图标 */
         .sort-icon {
@@ -1054,6 +1107,12 @@
             no_membership: '无会员'
         };
 
+        const STATUS_MAPPING = {
+            'Active': 'active',
+            'Inactive': 'inactive',
+            'Banned': 'inactive' // 封禁也映射为inactive
+        };
+
         const state = {
             users: [],
             currentData: [],
@@ -1080,6 +1139,46 @@
         };
 
         const SORT_ICONS = { asc: '↑', desc: '↓', none: '⇅' };
+
+        /* 通知系统 */
+        function showNotification(message, type = 'success', duration = 3000) {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            // 触发动画
+            setTimeout(() => notification.classList.add('show'), 100);
+            
+            // 自动隐藏
+            setTimeout(() => {
+                notification.classList.remove('show');
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.parentNode.removeChild(notification);
+                    }
+                }, 300);
+            }, duration);
+        }
+
+        /* 显示加载状态 */
+        function showLoading(button, text = '处理中...') {
+            if (!button) return;
+            button.dataset.originalText = button.textContent;
+            button.dataset.originalDisabled = button.disabled;
+            button.textContent = text;
+            button.disabled = true;
+        }
+
+        /* 隐藏加载状态 */
+        function hideLoading(button) {
+            if (!button) return;
+            button.textContent = button.dataset.originalText || button.textContent;
+            button.disabled = button.dataset.originalDisabled === 'true';
+            delete button.dataset.originalText;
+            delete button.dataset.originalDisabled;
+        }
 
         function debounce(fn, delay = 300) {
             let timerId;
@@ -1425,8 +1524,10 @@
                         </span>
                     </td>
                     <td>
-                        <button class="btn-action btn-edit" onclick="openEdit(${user.id})" title="编辑用户">编辑</button>
-                        <button class="btn-action btn-del" onclick="deleteUser(${user.id})" title="删除用户">删除</button>
+                        <div class="action-buttons">
+                            <button class="btn-action btn-edit" onclick="openEdit(${user.id})" title="编辑用户">编辑</button>
+                            <button class="btn-action btn-del" onclick="deleteUser(${user.id})" title="删除用户">删除</button>
+                        </div>
                     </td>
                 `;
                 tbody.appendChild(row);
@@ -1603,12 +1704,45 @@
         async function deleteUser(id) {
             if (!confirm('确定要删除此用户吗？操作不可恢复。')) return;
 
-            state.users = state.users.filter((user) => user.id !== id);
-            state.currentData = state.currentData.filter((user) => user.id !== id);
-            refreshLocalPagination();
-            renderTable(state.currentData);
-            renderPagination();
-            alert('🗑️ 用户删除成功！（示例数据未同步至后端）');
+            // 找到对应的删除按钮并显示加载状态
+            const deleteButton = document.querySelector(`button[onclick="deleteUser(${id})"]`);
+            showLoading(deleteButton, '删除中...');
+
+            try {
+                const response = await fetch('/api/v1/users/delete', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        user_id: id
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const result = await response.json();
+                if (!result.success) {
+                    throw new Error(result.error || '删除用户失败');
+                }
+
+                // 从本地状态中移除用户
+                state.users = state.users.filter((user) => user.id !== id);
+                state.currentData = state.currentData.filter((user) => user.id !== id);
+                refreshLocalPagination();
+                renderTable(state.currentData);
+                renderPagination();
+                
+                showNotification('✅ 用户删除成功！', 'success');
+            } catch (error) {
+                console.error('删除用户失败:', error);
+                showNotification(`❌ 删除用户失败: ${error.message}`, 'error');
+            } finally {
+                hideLoading(deleteButton);
+            }
         }
 
         function openAddModal() {
@@ -1627,7 +1761,14 @@
             document.getElementById('editPhone').value = user.phone || '';
             document.getElementById('editRole').value = user.role || 'user';
             document.getElementById('editMembership').value = user.membership_type || 'no_membership';
-            const statusValue = user.status === 'active' ? 'Active' : user.status === 'inactive' ? 'Inactive' : 'Banned';
+            
+            // 状态映射：从后端值到前端显示值
+            let statusValue = 'Inactive'; // 默认值
+            if (user.status === 'active') {
+                statusValue = 'Active';
+            } else if (user.status === 'inactive') {
+                statusValue = 'Inactive';
+            }
             document.getElementById('editStatus').value = statusValue;
 
             document.getElementById('editModal').classList.add('show');
@@ -1643,9 +1784,7 @@
         async function handleAddSubmit(event) {
             event.preventDefault();
             const submitButton = event.target.querySelector('.btn-submit');
-            const originalText = submitButton.textContent;
-            submitButton.textContent = '添加中...';
-            submitButton.disabled = true;
+            showLoading(submitButton, '添加中...');
 
             try {
                 const now = new Date().toISOString();
@@ -1669,22 +1808,19 @@
                 renderPagination();
 
                 closeModal('addModal');
-                alert('🎉 新用户添加成功！（示例数据未同步至后端）');
+                showNotification('🎉 新用户添加成功！（示例数据未同步至后端）', 'success');
             } catch (error) {
                 console.error('添加用户失败:', error);
-                alert('❌ 添加用户失败，请稍后重试');
+                showNotification('❌ 添加用户失败，请稍后重试', 'error');
             } finally {
-                submitButton.textContent = originalText;
-                submitButton.disabled = false;
+                hideLoading(submitButton);
             }
         }
 
         async function handleEditSubmit(event) {
             event.preventDefault();
             const submitButton = event.target.querySelector('.btn-submit');
-            const originalText = submitButton.textContent;
-            submitButton.textContent = '保存中...';
-            submitButton.disabled = true;
+            showLoading(submitButton, '保存中...');
 
             try {
                 const id = parseInt(document.getElementById('editId').value, 10);
@@ -1693,8 +1829,41 @@
                     throw new Error('未找到该用户');
                 }
 
+                // 准备更新数据
+                const statusValue = document.getElementById('editStatus').value;
+                const updateData = {
+                    user_id: id,
+                    user: {
+                        nickname: document.getElementById('editUsername').value,
+                        email: document.getElementById('editEmail').value,
+                        phone: document.getElementById('editPhone').value,
+                        role: document.getElementById('editRole').value,
+                        membership_type: document.getElementById('editMembership').value,
+                        status: STATUS_MAPPING[statusValue] || statusValue.toLowerCase()
+                    }
+                };
+
+                // 调用后端API更新用户
+                const response = await fetch('/api/v1/users/update', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify(updateData)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const result = await response.json();
+                if (!result.success) {
+                    throw new Error(result.error || '更新用户失败');
+                }
+
+                // 更新本地状态
                 const existing = state.users[index];
-                const now = new Date().toISOString();
                 const updatedUser = mapUserFromApi({
                     id: existing.id,
                     nickname: document.getElementById('editUsername').value,
@@ -1702,9 +1871,9 @@
                     phone: document.getElementById('editPhone').value,
                     role: document.getElementById('editRole').value,
                     membership_type: document.getElementById('editMembership').value,
-                    status: document.getElementById('editStatus').value.toLowerCase(),
+                    status: STATUS_MAPPING[statusValue] || statusValue.toLowerCase(),
                     created_at: existing.createdAtSource,
-                    updated_at: now
+                    updated_at: result.data.updated_at || new Date().toISOString()
                 });
 
                 state.users[index] = updatedUser;
@@ -1712,13 +1881,12 @@
                 renderTable(state.currentData);
 
                 closeModal('editModal');
-                alert('✅ 用户信息更新成功！（示例数据未同步至后端）');
+                showNotification('✅ 用户信息更新成功！', 'success');
             } catch (error) {
                 console.error('更新用户失败:', error);
-                alert('❌ 更新用户失败，请稍后重试');
+                showNotification(`❌ 更新用户失败: ${error.message}`, 'error');
             } finally {
-                submitButton.textContent = originalText;
-                submitButton.disabled = false;
+                hideLoading(submitButton);
             }
         }
 
