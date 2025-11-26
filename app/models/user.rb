@@ -21,7 +21,7 @@ class User < ApplicationRecord
   }, default: 'active'
   
   # 关联关系
-  # has_many :health_reports, dependent: :destroy
+  has_many :reports, dependent: :destroy
   
   # 验证规则
   validates :nickname, presence: true, length: { minimum: 2, maximum: 50 }

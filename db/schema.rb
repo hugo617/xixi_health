@@ -10,7 +10,27 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2024_11_24_160000) do
+ActiveRecord::Schema[7.2].define(version: 2024_11_26_100000) do
+  create_table "reports", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.bigint "user_id", null: false, comment: "关联用户ID"
+    t.string "report_type", null: false, comment: "报告类型：protein_test, gene_test等"
+    t.string "file_path", null: false, comment: "报告文件存储路径或URL"
+    t.string "status", default: "pending_generation", null: false, comment: "报告状态：进度类(待生成/审核中)/结果正常类/结果异常类(轻/中/重度)/特殊类(待补充/待修订)"
+    t.datetime "report_date", comment: "报告生成日期"
+    t.integer "file_size", comment: "报告文件大小（字节）"
+    t.text "description", comment: "报告描述或备注"
+    t.datetime "deleted_at", comment: "软删除时间戳"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["deleted_at"], name: "idx_reports_deleted_at"
+    t.index ["file_size"], name: "idx_reports_file_size"
+    t.index ["report_date"], name: "idx_reports_date"
+    t.index ["report_type"], name: "idx_reports_type"
+    t.index ["status"], name: "idx_reports_status"
+    t.index ["user_id", "report_type"], name: "idx_reports_user_type"
+    t.index ["user_id"], name: "index_reports_on_user_id"
+  end
+
   create_table "users", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.string "nickname", null: false
     t.string "email", null: false
@@ -29,4 +49,6 @@ ActiveRecord::Schema[7.2].define(version: 2024_11_24_160000) do
     t.index ["role"], name: "index_users_on_role"
     t.index ["status"], name: "index_users_on_status"
   end
+
+  add_foreign_key "reports", "users"
 end
