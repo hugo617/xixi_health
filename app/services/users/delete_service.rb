@@ -27,8 +27,15 @@ module Users
       user = User.find_by(id: @user_id)
       return { success: false, data: nil, error: "用户不存在" } unless user
       
-      # 检查用户是否已经被删除
-      return { success: false, data: nil, error: "用户已经被删除" } if user.deleted_at.present?
+      # 如果用户已经被删除，返回成功（幂等操作）
+      if user.deleted_at.present?
+        Rails.logger.info "Users::DeleteService - User #{@user_id} already deleted, returning success (idempotent)"
+        return {
+          success: true,
+          data: { user_id: @user_id, deleted_at: user.deleted_at },
+          error: nil
+        }
+      end
       
       # 执行软删除
       if user.update(deleted_at: Time.current)

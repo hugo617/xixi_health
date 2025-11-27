@@ -21,6 +21,12 @@ Rails.application.routes.draw do
       
       # 报告搜索接口
       post 'reports/search', to: 'reports#search'
+      # 报告创建接口
+      post 'reports/create', to: 'reports#create'
+      # 报告更新接口
+      post 'reports/update', to: 'reports#update'
+      # 报告删除接口
+      post 'reports/delete', to: 'reports#delete'
     end
   end
   
