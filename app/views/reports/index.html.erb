@@ -159,6 +159,48 @@
             color: #9ca3af;
         }
 
+        .filter-group {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .filter-select {
+            padding: 12px 14px;
+            border-radius: 14px;
+            border: 1px solid rgba(0,0,0,0.08);
+            background: rgba(255,255,255,0.9);
+            font-size: 0.9rem;
+            color: var(--text-main);
+            min-width: 150px;
+            transition: border-color 0.2s;
+        }
+
+        .filter-select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+        }
+
+        .btn-refresh {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 10px 16px;
+            border-radius: 12px;
+            border: 1px solid rgba(16,185,129,0.2);
+            background: white;
+            color: var(--primary);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-refresh:hover {
+            background: rgba(16,185,129,0.08);
+            border-color: var(--primary);
+        }
+
         .btn-upload {
             background: var(--dark-btn);
             color: white;
@@ -482,6 +524,48 @@
             opacity: 1;
         }
 
+        /* 操作按钮样式 */
+        .btn-action {
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            border: 1px solid transparent;
+            margin-right: 6px;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-edit { 
+            background: white; 
+            border-color: #e5e7eb; 
+            color: var(--text-main); 
+        }
+        
+        .btn-edit:hover { 
+            border-color: var(--primary); 
+            color: var(--primary); 
+            transform: translateY(-1px);
+        }
+        
+        .btn-del { 
+            background: white; 
+            border-color: #fca5a5; 
+            color: #ef4444; 
+        }
+        
+        .btn-del:hover { 
+            background: #fef2f2; 
+            border-color: #ef4444; 
+            transform: translateY(-1px);
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
         /* 状态徽章样式 */
         .badge {
             display: inline-flex;
@@ -497,6 +581,184 @@
         .status-reviewing { background: #fef3c7; color: #92400e; }
         .status-abnormal { background: #fee2e2; color: #b91c1c; }
         .status-unknown { background: #e5e7eb; color: #6b7280; }
+
+        /* 文件上传样式 */
+        .file-input {
+            padding: 12px 16px;
+            border: 2px dashed #e5e7eb;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .file-input:hover {
+            border-color: var(--primary);
+            background: rgba(16, 185, 129, 0.05);
+        }
+        
+        .file-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.15);
+        }
+        
+        .file-preview {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            background: rgba(16, 185, 129, 0.05);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            border-radius: 12px;
+            margin-top: 8px;
+        }
+        
+        .file-info {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        
+        .file-info span:first-child {
+            font-weight: 500;
+            color: var(--text-main);
+        }
+        
+        .file-info span:last-child {
+            font-size: 0.85rem;
+            color: var(--text-sub);
+        }
+        
+        .btn-remove-file {
+            padding: 6px 12px;
+            background: #fee2e2;
+            color: #b91c1c;
+            border: 1px solid #fca5a5;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-remove-file:hover {
+            background: #fecaca;
+            border-color: #ef4444;
+        }
+        
+        /* 用户选择器样式 */
+        .user-select-container {
+            position: relative;
+        }
+        
+        .user-suggestions {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-top: none;
+            border-radius: 0 0 12px 12px;
+            max-height: 200px;
+            overflow-y: auto;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            z-index: 1000;
+        }
+        
+        .user-suggestion-item {
+            padding: 12px 16px;
+            cursor: pointer;
+            border-bottom: 1px solid #f3f4f6;
+            transition: background-color 0.2s;
+        }
+        
+        .user-suggestion-item:hover {
+            background-color: #f9fafb;
+        }
+        
+        .user-suggestion-item.selected {
+            background-color: rgba(16, 185, 129, 0.1);
+        }
+        
+        .user-suggestion-name {
+            font-weight: 500;
+            color: #111827;
+            margin-bottom: 4px;
+        }
+        
+        .user-suggestion-email {
+            font-size: 0.85rem;
+            color: #6b7280;
+        }
+        
+        .user-suggestion-empty {
+            padding: 16px;
+            text-align: center;
+            color: #6b7280;
+        }
+        
+        .user-suggestion-loading {
+            padding: 16px;
+            text-align: center;
+            color: #6b7280;
+        }
+
+        /* 表单验证样式 */
+        .form-group.has-error .form-input {
+            border-color: #ef4444;
+            background: rgba(254, 226, 226, 0.3);
+        }
+        
+        .form-group.has-error .form-help {
+            color: #ef4444;
+        }
+        
+        .form-group.success .form-input {
+            border-color: #10b981;
+            background: rgba(16, 185, 129, 0.05);
+        }
+        
+        .required-indicator {
+            color: #ef4444;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+        
+        .error-message {
+            color: #ef4444;
+            font-size: 0.85rem;
+            margin-top: 6px;
+            display: block;
+            font-weight: 500;
+            padding-left: 4px;
+        }
+        
+        .form-help {
+            color: var(--text-sub);
+            font-size: 0.8rem;
+            margin-top: 6px;
+            display: block;
+            font-weight: 400;
+        }
+        .form-group.has-error .form-input {
+            border-color: #ef4444;
+            background: rgba(254, 226, 226, 0.3);
+        }
+        
+        .form-group.has-error .form-help {
+            color: #ef4444;
+        }
+        
+        .form-group.success .form-input {
+            border-color: #10b981;
+            background: rgba(16, 185, 129, 0.05);
+        }
+        
+        .required-indicator {
+            color: #ef4444;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
 
         /* 报告状态样式 */
         .report-status-badge {
@@ -731,10 +993,35 @@
                 </span>
                 <input type="text" id="searchInput" placeholder="搜索用户名或报告类型..." onkeyup="handleSearch()">
             </div>
-            <button class="btn-upload" onclick="openUploadModal()">
-                <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
-                上传报告
-            </button>
+            <div class="filter-group">
+                <select id="filterReportType" class="filter-select" aria-label="筛选报告类型">
+                    <option value="">全部类型</option>
+                    <option value="protein_test">蛋白质检测</option>
+                    <option value="gene_test">基因检测</option>
+                    <option value="blood_test">血液检测</option>
+                    <option value="urine_test">尿液检测</option>
+                    <option value="other_test">其他检测</option>
+                </select>
+                <select id="filterStatus" class="filter-select" aria-label="筛选报告状态">
+                    <option value="">全部状态</option>
+                    <option value="pending_generation">待生成</option>
+                    <option value="under_review">审核中</option>
+                    <option value="normal_result">结果正常</option>
+                    <option value="abnormal_mild">异常（轻度）</option>
+                    <option value="abnormal_moderate">异常（中度）</option>
+                    <option value="abnormal_severe">异常（重度）</option>
+                    <option value="pending_supplement">待补充</option>
+                    <option value="pending_revision">待修订</option>
+                </select>
+                <button type="button" class="btn-refresh" id="btnResetFilters">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><polyline points="23 20 23 14 17 14"/><path d="M20.49 9A9 9 0 1 0 6 4.33"/></svg>
+                    清除筛选
+                </button>
+                <button class="btn-upload" onclick="openUploadModal()">
+                    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                    上传报告
+                </button>
+            </div>
         </div>
 
         <div class="table-wrapper">
@@ -800,8 +1087,14 @@
             <h2>📤 上传新报告</h2>
             <form id="uploadForm">
                 <div class="form-group">
-                    <label class="form-label">用户名</label>
-                    <input type="text" id="upUser" class="form-input" placeholder="输入关联的用户名" required>
+                    <label class="form-label">选择用户 <span class="required-indicator">*</span></label>
+                    <div class="user-select-container">
+                        <input type="text" id="upUser" class="form-input" placeholder="输入用户名搜索或选择用户" required autocomplete="off">
+                        <div id="userSuggestions" class="user-suggestions" style="display: none;">
+                            <!-- 用户建议列表将在这里显示 -->
+                        </div>
+                        <input type="hidden" id="upUserId" name="user_id">
+                    </div>
                 </div>
                 <div class="form-group">
                     <label class="form-label">报告类型</label>
@@ -814,9 +1107,15 @@
                     </select>
                 </div>
                 <div class="form-group">
-                    <label class="form-label">文件附件</label>
-                    <div class="file-upload-fake">
-                        📄 点击选择 PDF 或 图像文件...
+                    <label class="form-label">文件附件 <span class="required-indicator">*</span></label>
+                    <input type="file" id="upFile" class="form-input file-input" accept=".pdf,.doc,.docx,.txt,.xls,.xlsx,.jpg,.jpeg,.png" required>
+                    <small class="form-help">支持 PDF、Word、Excel、文本文件和图片格式，最大 100MB</small>
+                    <div id="filePreview" class="file-preview" style="display: none;">
+                        <div class="file-info">
+                            <span id="fileName"></span>
+                            <span id="fileSize"></span>
+                        </div>
+                        <button type="button" class="btn-remove-file" onclick="removeSelectedFile()">移除</button>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -830,24 +1129,40 @@
     <!-- 2. 编辑模态框 -->
     <div class="overlay" id="editModal">
         <div class="modal">
-            <h2>✏️ 编辑用户信息</h2>
+            <h2>✏️ 编辑报告信息</h2>
             <form id="editForm">
                 <input type="hidden" id="editId">
                 <div class="form-group">
-                    <label class="form-label">用户名</label>
-                    <input type="text" id="editUser" class="form-input" required>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">邮箱</label>
-                    <input type="email" id="editEmail" class="form-input" required>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">用户状态</label>
-                    <select id="editStatus" class="form-input">
-                        <option value="Active">Active (正常)</option>
-                        <option value="Inactive">Inactive (停用)</option>
-                        <option value="Reviewing">Reviewing (审核中)</option>
+                    <label class="form-label">报告类型 <span class="required-indicator">*</span></label>
+                    <select id="editReportType" class="form-input" required>
+                        <option value="protein_test">蛋白质检测</option>
+                        <option value="gene_test">基因检测</option>
+                        <option value="blood_test">血液检测</option>
+                        <option value="urine_test">尿液检测</option>
+                        <option value="other_test">其他检测</option>
                     </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">报告状态 <span class="required-indicator">*</span></label>
+                    <select id="editStatus" class="form-input" required>
+                        <option value="pending_generation">待生成</option>
+                        <option value="under_review">审核中</option>
+                        <option value="normal_result">结果正常</option>
+                        <option value="abnormal_mild">异常（轻度）</option>
+                        <option value="abnormal_moderate">异常（中度）</option>
+                        <option value="abnormal_severe">异常（重度）</option>
+                        <option value="pending_supplement">待补充</option>
+                        <option value="pending_revision">待修订</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">报告日期</label>
+                    <input type="date" id="editReportDate" class="form-input">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">报告描述</label>
+                    <textarea id="editDescription" class="form-input" rows="3" placeholder="输入报告描述或备注信息" maxlength="500"></textarea>
+                    <small class="form-help">最多500个字符</small>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn-cancel" onclick="closeModal('editModal')">取消</button>
@@ -861,6 +1176,12 @@
         // API配置
         const API_BASE = '/api/v1';
         
+        // 获取CSRF令牌
+        function getCsrfToken() {
+            const token = document.querySelector('meta[name="csrf-token"]')?.content;
+            return token || '';
+        }
+        
         // 状态管理
         let appState = {
             reports: [],
@@ -872,6 +1193,8 @@
             },
             filters: {
                 search: '',
+                report_type: '',
+                status: '',
                 sortField: 'created_at',
                 sortOrder: 'desc'
             },
@@ -941,6 +1264,9 @@
         document.addEventListener('DOMContentLoaded', () => {
             console.log('DOMContentLoaded fired');
             
+            // 初始化筛选控件事件监听
+            initializeFilterControls();
+            
             // 初始化分页控件事件监听
             const initSuccess = initializePaginationControls();
             if (!initSuccess) {
@@ -984,6 +1310,48 @@
                 }
             }, 2000);
         });
+
+        // 初始化筛选控件事件监听
+        function initializeFilterControls() {
+            const filterReportType = document.getElementById('filterReportType');
+            const filterStatus = document.getElementById('filterStatus');
+            const resetFiltersBtn = document.getElementById('btnResetFilters');
+            
+            if (filterReportType) {
+                filterReportType.addEventListener('change', (e) => {
+                    appState.filters.report_type = e.target.value;
+                    appState.pagination.current_page = 1;
+                    loadReports();
+                });
+            }
+            
+            if (filterStatus) {
+                filterStatus.addEventListener('change', (e) => {
+                    appState.filters.status = e.target.value;
+                    appState.pagination.current_page = 1;
+                    loadReports();
+                });
+            }
+            
+            if (resetFiltersBtn) {
+                resetFiltersBtn.addEventListener('click', resetFilters);
+            }
+        }
+
+        // 重置筛选条件
+        function resetFilters() {
+            appState.filters.report_type = '';
+            appState.filters.status = '';
+            appState.filters.search = '';
+            appState.pagination.current_page = 1;
+            
+            // 重置UI控件
+            document.getElementById('filterReportType').value = '';
+            document.getElementById('filterStatus').value = '';
+            document.getElementById('searchInput').value = '';
+            
+            loadReports();
+        }
 
         // 初始化分页控件事件监听
         function initializePaginationControls() {
@@ -1123,11 +1491,19 @@
                     }
                 };
 
-                // 添加搜索过滤
-                if (appState.filters.search) {
-                    // 这里可以根据实际需求调整搜索逻辑
-                    // 由于后端API没有直接的search参数，我们可以考虑在前端过滤
-                    // 或者扩展后端API来支持搜索功能
+                // 添加筛选条件
+                if (appState.filters.report_type) {
+                    searchParams.filters.report_type = appState.filters.report_type;
+                }
+                
+                if (appState.filters.status) {
+                    searchParams.filters.status = appState.filters.status;
+                }
+                
+                // 添加排序条件
+                if (appState.filters.sortField && appState.filters.sortOrder !== 'none') {
+                    // 这里可以根据后端API的设计添加排序参数
+                    // 由于当前API可能不支持排序，我们暂时在前端处理
                 }
 
                 const response = await fetch(`${API_BASE}/reports/search`, {
@@ -1315,7 +1691,7 @@
                     </td>
                     <td>
                         <div class="action-buttons">
-                            <button class="btn-action btn-edit" onclick="viewReport(${report.id})" title="查看详情">详情</button>
+                            <button class="btn-action btn-edit" onclick="openEdit(${report.id})" title="编辑报告">编辑</button>
                             <button class="btn-action btn-del" onclick="deleteReport(${report.id})" title="删除报告">删除</button>
                         </div>
                     </td>
@@ -1498,23 +1874,30 @@
             
             if (confirm(`确定要永久删除 [${username}] 的 [${reportType}] 报告吗？`)) {
                 try {
-                    const response = await fetch(`${API_BASE}/reports/${id}`, {
-                        method: 'DELETE',
+                    const response = await fetch(`${API_BASE}/reports/delete`, {
+                        method: 'POST',
                         headers: {
+                            'Content-Type': 'application/json',
                             'X-CSRF-Token': getCsrfToken(),
                             'Accept': 'application/json'
-                        }
+                        },
+                        body: JSON.stringify({ report_id: id })
                     });
 
                     if (response.ok) {
-                        showNotification('报告删除成功', 'success');
-                        loadReports(); // 重新加载数据
+                        const result = await response.json();
+                        if (result.success) {
+                            showNotification('报告删除成功', 'success');
+                            loadReports(); // 重新加载数据
+                        } else {
+                            throw new Error(result.error || '删除失败');
+                        }
                     } else {
-                        throw new Error('删除失败');
+                        throw new Error('删除请求失败');
                     }
                 } catch (error) {
                     console.error('Failed to delete report:', error);
-                    showNotification('删除报告失败，请稍后重试', 'error');
+                    showNotification(`删除报告失败: ${error.message}`, 'error');
                 }
             }
         }
@@ -1531,37 +1914,435 @@
 
         function openUploadModal() {
             document.getElementById('uploadForm').reset();
+            // 清除文件预览
+            document.getElementById('filePreview').style.display = 'none';
+            document.getElementById('fileName').textContent = '';
+            document.getElementById('fileSize').textContent = '';
+            // 清除表单验证状态
+            clearFormValidation('uploadForm');
+            // 隐藏用户建议列表
+            hideUserSuggestions();
+            // 清空隐藏的用户ID
+            document.getElementById('upUserId').value = '';
             document.getElementById('uploadModal').classList.add('show');
+        }
+
+        // 清除表单验证状态
+        function clearFormValidation(formId) {
+            const form = document.getElementById(formId);
+            if (!form) return;
+            
+            form.querySelectorAll('.form-group').forEach(group => {
+                group.classList.remove('has-error', 'success');
+                const errorElement = group.querySelector('.error-message');
+                if (errorElement) {
+                    errorElement.remove();
+                }
+            });
+        }
+
+        // 用户自动完成功能
+        let userSearchTimeout;
+        let currentUserSuggestions = [];
+        let selectedUserIndex = -1;
+
+        // 监听用户输入
+        document.getElementById('upUser')?.addEventListener('input', function(e) {
+            const query = e.target.value.trim();
+            
+            if (query.length < 1) {
+                hideUserSuggestions();
+                return;
+            }
+            
+            // 防抖处理
+            clearTimeout(userSearchTimeout);
+            userSearchTimeout = setTimeout(() => {
+                searchUsers(query);
+            }, 300);
+        });
+
+        // 监听键盘事件
+        document.getElementById('upUser')?.addEventListener('keydown', function(e) {
+            const suggestions = document.getElementById('userSuggestions');
+            if (suggestions.style.display === 'none') return;
+            
+            const items = suggestions.querySelectorAll('.user-suggestion-item');
+            
+            switch(e.key) {
+                case 'ArrowDown':
+                    e.preventDefault();
+                    selectedUserIndex = Math.min(selectedUserIndex + 1, items.length - 1);
+                    updateSelection(items);
+                    break;
+                case 'ArrowUp':
+                    e.preventDefault();
+                    selectedUserIndex = Math.max(selectedUserIndex - 1, -1);
+                    updateSelection(items);
+                    break;
+                case 'Enter':
+                    e.preventDefault();
+                    if (selectedUserIndex >= 0 && items[selectedUserIndex]) {
+                        selectUser(items[selectedUserIndex]);
+                    }
+                    break;
+                case 'Escape':
+                    hideUserSuggestions();
+                    break;
+            }
+        });
+
+        // 点击外部隐藏建议列表
+        document.addEventListener('click', function(e) {
+            const container = document.querySelector('.user-select-container');
+            if (container && !container.contains(e.target)) {
+                hideUserSuggestions();
+            }
+        });
+
+        // 搜索用户
+        async function searchUsers(query) {
+            const suggestions = document.getElementById('userSuggestions');
+            
+            // 显示加载状态
+            suggestions.innerHTML = '<div class="user-suggestion-loading">🔍 搜索中...</div>';
+            suggestions.style.display = 'block';
+            
+            try {
+                const response = await fetch(`${API_BASE}/users/search`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-Token': getCsrfToken()
+                    },
+                    body: JSON.stringify({
+                        filters: { name: query },
+                        pagination: { page: 1, per_page: 10 }
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                
+                const result = await response.json();
+                
+                if (result.success && result.data.users && result.data.users.length > 0) {
+                    currentUserSuggestions = result.data.users;
+                    selectedUserIndex = -1;
+                    displayUserSuggestions(result.data.users);
+                } else {
+                    suggestions.innerHTML = '<div class="user-suggestion-empty">😅 未找到匹配的用户</div>';
+                }
+                
+            } catch (error) {
+                console.error('搜索用户失败:', error);
+                suggestions.innerHTML = '<div class="user-suggestion-empty">❌ 搜索失败，请重试</div>';
+            }
+        }
+
+        // 显示用户建议
+        function displayUserSuggestions(users) {
+            const suggestions = document.getElementById('userSuggestions');
+            
+            if (users.length === 0) {
+                suggestions.innerHTML = '<div class="user-suggestion-empty">😅 未找到匹配的用户</div>';
+                return;
+            }
+            
+            let html = '';
+            users.forEach((user, index) => {
+                const name = user.nickname || '未命名用户';
+                const email = user.email || '';
+                const phone = user.phone || '';
+                
+                html += `
+                    <div class="user-suggestion-item" data-user-id="${user.id}" data-user-name="${name}" onclick="selectUser(this)" onmouseenter="highlightSuggestion(${index})">
+                        <div class="user-suggestion-name">${name}</div>
+                        <div class="user-suggestion-email">${email} ${phone ? `• ${phone}` : ''}</div>
+                    </div>
+                `;
+            });
+            
+            suggestions.innerHTML = html;
+            suggestions.style.display = 'block';
+        }
+
+        // 选择用户
+        function selectUser(element) {
+            const userId = element.dataset.userId;
+            const userName = element.dataset.userName;
+            
+            document.getElementById('upUser').value = userName;
+            document.getElementById('upUserId').value = userId;
+            
+            hideUserSuggestions();
+            
+            // 清除错误状态
+            const formGroup = document.getElementById('upUser').closest('.form-group');
+            if (formGroup && formGroup.classList.contains('has-error')) {
+                formGroup.classList.remove('has-error');
+                const errorElement = formGroup.querySelector('.error-message');
+                if (errorElement) {
+                    errorElement.remove();
+                }
+            }
+        }
+
+        // 高亮建议项
+        function highlightSuggestion(index) {
+            selectedUserIndex = index;
+            updateSelection(document.querySelectorAll('.user-suggestion-item'));
+        }
+
+        // 更新选择状态
+        function updateSelection(items) {
+            items.forEach((item, index) => {
+                if (index === selectedUserIndex) {
+                    item.classList.add('selected');
+                } else {
+                    item.classList.remove('selected');
+                }
+            });
+        }
+
+        // 隐藏用户建议
+        function hideUserSuggestions() {
+            const suggestions = document.getElementById('userSuggestions');
+            suggestions.style.display = 'none';
+            selectedUserIndex = -1;
+        }
+
+        // 显示表单验证错误
+        function showFormError(inputId, message) {
+            const input = document.getElementById(inputId);
+            const formGroup = input.closest('.form-group');
+            if (!formGroup) return;
+
+            // 清除之前的错误
+            const existingError = formGroup.querySelector('.error-message');
+            if (existingError) {
+                existingError.remove();
+            }
+
+            // 创建错误消息元素
+            const errorElement = document.createElement('div');
+            errorElement.className = 'error-message';
+            errorElement.textContent = message;
+
+            // 添加错误样式和消息
+            formGroup.classList.add('has-error');
+            formGroup.classList.remove('success');
+            formGroup.appendChild(errorElement);
+
+            // 添加输入事件监听器来自动清除错误
+            const clearError = function() {
+                formGroup.classList.remove('has-error');
+                errorElement.remove();
+                input.removeEventListener('input', clearError);
+            };
+            input.addEventListener('input', clearError);
+        }
+
+        // 显示表单验证成功
+        function showFormSuccess(inputId) {
+            const input = document.getElementById(inputId);
+            const formGroup = input.closest('.form-group');
+            if (!formGroup) return;
+
+            // 清除错误状态
+            formGroup.classList.remove('has-error');
+            const existingError = formGroup.querySelector('.error-message');
+            if (existingError) {
+                existingError.remove();
+            }
+
+            // 添加成功样式
+            formGroup.classList.add('success');
+        }
+
+        // 验证单个字段
+        function validateField(inputId) {
+            const input = document.getElementById(inputId);
+            if (!input) return true;
+            
+            const value = input.value.trim();
+            let isValid = true;
+
+            switch(inputId) {
+                case 'upUser':
+                    const userId = document.getElementById('upUserId').value;
+                    if (!value) {
+                        showFormError(inputId, '请选择用户');
+                        isValid = false;
+                    } else if (!userId) {
+                        showFormError(inputId, '请从搜索结果中选择有效用户');
+                        isValid = false;
+                    }
+                    break;
+                case 'upFile':
+                    if (!input.files || input.files.length === 0) {
+                        showFormError(inputId, '请选择要上传的文件');
+                        isValid = false;
+                    }
+                    break;
+            }
+
+            if (isValid) {
+                showFormSuccess(inputId);
+            }
+            return isValid;
+        }
+
+        // 文件选择处理
+        document.getElementById('upFile')?.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            // 文件验证
+            const validTypes = [
+                'application/pdf',
+                'application/msword',
+                'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                'text/plain',
+                'application/vnd.ms-excel',
+                'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                'image/jpeg',
+                'image/jpg',
+                'image/png'
+            ];
+            
+            const maxSize = 100 * 1024 * 1024; // 100MB
+            
+            if (!validTypes.includes(file.type)) {
+                showNotification('不支持的文件格式，请选择有效的文件类型', 'error');
+                e.target.value = '';
+                return;
+            }
+            
+            if (file.size > maxSize) {
+                showNotification('文件大小不能超过 100MB', 'error');
+                e.target.value = '';
+                return;
+            }
+            
+            // 显示文件预览
+            document.getElementById('fileName').textContent = file.name;
+            document.getElementById('fileSize').textContent = formatFileSize(file.size);
+            document.getElementById('filePreview').style.display = 'flex';
+        });
+
+        // 移除选中的文件
+        function removeSelectedFile() {
+            document.getElementById('upFile').value = '';
+            document.getElementById('filePreview').style.display = 'none';
+            document.getElementById('fileName').textContent = '';
+            document.getElementById('fileSize').textContent = '';
         }
 
         // 处理上传表单提交
         document.getElementById('uploadForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
+            // 清除之前的验证状态
+            clearFormValidation('uploadForm');
+            
             const user = document.getElementById('upUser').value.trim();
             const type = document.getElementById('upType').value;
+            const fileInput = document.getElementById('upFile');
+            const file = fileInput.files[0];
             
+            // 表单验证
+            let isValid = true;
+            
+            const userId = document.getElementById('upUserId').value;
             if (!user) {
-                showNotification('请输入用户名', 'error');
+                showFormError('upUser', '请选择用户');
+                isValid = false;
+            } else if (!userId) {
+                showFormError('upUser', '请从搜索结果中选择有效用户');
+                isValid = false;
+            }
+            
+            if (!file) {
+                showFormError('upFile', '请选择要上传的文件');
+                isValid = false;
+            }
+            
+            if (!isValid) {
                 return;
             }
             
+            // 显示加载状态
+            const submitBtn = e.target.querySelector('.btn-save');
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = '上传中...';
+            submitBtn.disabled = true;
+            
             try {
-                // 这里应该调用实际的上传API
-                // 由于当前后端API可能不支持直接上传，我们暂时显示成功消息
-                showNotification('🎉 报告上传成功', 'success');
-                closeModal('uploadModal');
+                // 创建报告数据 - 使用已选择的用户ID
+                const reportData = {
+                    report: {
+                        user_id: parseInt(userId),
+                        report_type: getReportTypeValue(type),
+                        file_path: `/uploads/reports/${Date.now()}_${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`,
+                        file_size: file.size,
+                        status: 'pending_generation',
+                        description: `上传文件: ${file.name}`,
+                        report_date: new Date().toISOString().split('T')[0]
+                    }
+                };
                 
-                // 重新加载数据
-                setTimeout(() => {
-                    loadReports();
-                }, 1000);
+                const createResponse = await fetch(`${API_BASE}/reports/create`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-Token': getCsrfToken()
+                    },
+                    body: JSON.stringify(reportData)
+                });
+                
+                if (!createResponse.ok) {
+                    const errorData = await createResponse.json().catch(() => ({ error: '创建报告失败' }));
+                    throw new Error(errorData.error || '创建报告失败');
+                }
+                
+                const result = await createResponse.json();
+                if (result.success) {
+                    showNotification('🎉 报告创建成功', 'success');
+                    closeModal('uploadModal');
+                    
+                    // 重新加载数据
+                    setTimeout(() => {
+                        loadReports();
+                    }, 1000);
+                } else {
+                    throw new Error(result.error || '创建报告失败');
+                }
                 
             } catch (error) {
                 console.error('Upload failed:', error);
-                showNotification('上传失败，请稍后重试', 'error');
+                showNotification(`上传失败: ${error.message}`, 'error');
+            } finally {
+                // 恢复按钮状态
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
             }
         });
+
+        // 获取报告类型的后端值
+        function getReportTypeValue(displayType) {
+            const typeMap = {
+                '体检报告': 'other_test',
+                '血液分析': 'blood_test',
+                'X光影像': 'other_test',
+                '基因检测': 'gene_test',
+                '处方单': 'other_test'
+            };
+            return typeMap[displayType] || 'other_test';
+        }
 
         // 显示通知
         function showNotification(message, type = 'info') {
@@ -1703,34 +2484,99 @@
             document.getElementById('editModal').classList.add('show');
         }
 
+        // 打开编辑模态框
+        function openEdit(id) {
+            const report = appState.reports.find(r => r.id === id);
+            if (!report) return;
+            
+            document.getElementById('editId').value = report.id;
+            document.getElementById('editReportType').value = report.report_type || 'other_test';
+            document.getElementById('editStatus').value = report.status || 'pending_generation';
+            document.getElementById('editReportDate').value = report.report_date ? new Date(report.report_date).toISOString().split('T')[0] : '';
+            document.getElementById('editDescription').value = report.description || '';
+            
+            document.getElementById('editModal').classList.add('show');
+        }
+
         // 处理编辑表单提交
         document.getElementById('editForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
             const id = parseInt(document.getElementById('editId').value);
-            const username = document.getElementById('editUser').value.trim();
-            const email = document.getElementById('editEmail').value.trim();
+            const reportType = document.getElementById('editReportType').value;
             const status = document.getElementById('editStatus').value;
+            const reportDate = document.getElementById('editReportDate').value;
+            const description = document.getElementById('editDescription').value.trim();
             
-            if (!username || !email) {
-                showNotification('请填写完整的用户信息', 'error');
+            // 表单验证
+            if (!reportType) {
+                showNotification('请选择报告类型', 'error');
+                document.getElementById('editReportType').focus();
                 return;
             }
             
+            if (!status) {
+                showNotification('请选择报告状态', 'error');
+                document.getElementById('editStatus').focus();
+                return;
+            }
+            
+            // 显示加载状态
+            const submitBtn = e.target.querySelector('.btn-save');
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = '保存中...';
+            submitBtn.disabled = true;
+            
             try {
-                // 这里应该调用实际的更新API
-                // 由于当前后端API可能不支持用户信息的更新，我们暂时显示成功消息
-                showNotification('✅ 用户信息更新成功', 'success');
-                closeModal('editModal');
+                // 构建更新数据
+                const updateData = {
+                    report_id: id,
+                    report: {
+                        report_type: reportType,
+                        status: status,
+                        description: description
+                    }
+                };
                 
-                // 重新加载数据
-                setTimeout(() => {
-                    loadReports();
-                }, 1000);
+                // 如果选择了日期，添加到更新数据中
+                if (reportDate) {
+                    updateData.report.report_date = reportDate;
+                }
+                
+                const response = await fetch(`${API_BASE}/reports/update`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-Token': getCsrfToken()
+                    },
+                    body: JSON.stringify(updateData)
+                });
+                
+                if (!response.ok) {
+                    throw new Error('更新报告失败');
+                }
+                
+                const result = await response.json();
+                if (result.success) {
+                    showNotification('✅ 报告信息更新成功', 'success');
+                    closeModal('editModal');
+                    
+                    // 重新加载数据
+                    setTimeout(() => {
+                        loadReports();
+                    }, 1000);
+                } else {
+                    throw new Error(result.error || '更新报告失败');
+                }
                 
             } catch (error) {
                 console.error('Update failed:', error);
-                showNotification('更新失败，请稍后重试', 'error');
+                showNotification(`更新失败: ${error.message}`, 'error');
+            } finally {
+                // 恢复按钮状态
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
             }
         });
     </script>
