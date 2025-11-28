@@ -2,6 +2,8 @@
 # 报告创建服务
 # 处理健康报告创建的业务逻辑
 
+require "fileutils"
+
 module Reports
   class CreateService
     # 允许创建的字段
@@ -12,6 +14,12 @@ module Reports
     
     # 允许的文件扩展名
     ALLOWED_FILE_EXTENSIONS = %w[pdf doc docx txt xls xlsx].freeze
+
+    # 上传目录（相对于 Rails.root）
+    UPLOAD_BASE_DIR = Rails.root.join("public", "uploads", "reports").freeze
+
+    # 单个上传文件的最大大小（10MB）
+    MAX_UPLOAD_FILE_SIZE = 10.megabytes
     
     # 服务对象的入口点
     # @param params [Hash] 创建参数
@@ -23,7 +31,9 @@ module Reports
     # 初始化服务
     # @param params [Hash] 创建参数
     def initialize(params = {})
-      @create_params = (params[:report] || {}).symbolize_keys.slice(*ALLOWED_CREATE_FIELDS)
+      report_params = params[:report] || {}
+      @uploaded_file = report_params[:file] || report_params["file"]
+      @create_params = report_params.symbolize_keys.slice(*ALLOWED_CREATE_FIELDS)
       # 设置默认值
       @create_params[:status] ||= 'pending_generation'
       @create_params[:report_date] ||= Time.current
@@ -33,6 +43,10 @@ module Reports
     # 执行报告创建逻辑
     # @return [Hash] 标准化服务响应格式
     def execute
+      # 如果有上传文件，先处理文件上传，生成并填充 file_path / file_size
+      upload_result = handle_file_upload
+      return upload_result unless upload_result[:success]
+
       # 验证创建参数
       validation_result = validate_create_params
       return validation_result unless validation_result[:success]
@@ -63,6 +77,42 @@ module Reports
     end
 
     private
+
+    # 处理文件上传（可选）
+    # @return [Hash] 标准化服务响应格式；如果没有上传文件则返回 success: true
+    def handle_file_upload
+      return { success: true, data: nil, error: nil } if @uploaded_file.blank?
+
+      unless pdf_file?(@uploaded_file)
+        return { success: false, data: nil, error: "只支持上传PDF文件" }
+      end
+
+      if @uploaded_file.size.to_i > MAX_UPLOAD_FILE_SIZE
+        return { success: false, data: nil, error: "文件大小不能超过#{MAX_UPLOAD_FILE_SIZE / 1.megabyte}MB" }
+      end
+
+      FileUtils.mkdir_p(UPLOAD_BASE_DIR) unless Dir.exist?(UPLOAD_BASE_DIR)
+
+      sanitized_name = sanitize_filename(@uploaded_file.original_filename)
+      timestamp = Time.current.strftime("%Y%m%d%H%M%S")
+      stored_name = "#{timestamp}_#{sanitized_name}"
+
+      absolute_path = UPLOAD_BASE_DIR.join(stored_name)
+      relative_path = "/uploads/reports/#{stored_name}"
+
+      File.open(absolute_path, "wb") do |file|
+        file.write(@uploaded_file.read)
+      end
+
+      @create_params[:file_path] = relative_path
+      @create_params[:file_size] = @uploaded_file.size.to_i
+
+      { success: true, data: nil, error: nil }
+    rescue StandardError => e
+      Rails.logger.error "Reports::CreateService file upload error: #{e.class} - #{e.message}"
+      Rails.logger.error e.backtrace.join("\n")
+      { success: false, data: nil, error: "文件上传失败，请稍后重试" }
+    end
 
     # 验证创建参数
     # @return [Hash] 验证结果
@@ -144,6 +194,26 @@ module Reports
       # 检查路径格式和扩展名
       extension = File.extname(file_path).downcase[1..-1]
       file_path.match?(/\A\/.+\.(#{ALLOWED_FILE_EXTENSIONS.join('|')})\z/i) && ALLOWED_FILE_EXTENSIONS.include?(extension)
+    end
+
+    # 判断上传文件是否为 PDF
+    # @param uploaded_file [ActionDispatch::Http::UploadedFile]
+    # @return [Boolean]
+    def pdf_file?(uploaded_file)
+      return false if uploaded_file.blank?
+
+      content_type = uploaded_file.content_type.to_s.downcase
+      return true if content_type == "application/pdf"
+
+      File.extname(uploaded_file.original_filename.to_s).downcase == ".pdf"
+    end
+
+    # 清理文件名，防止路径遍历
+    # @param filename [String]
+    # @return [String]
+    def sanitize_filename(filename)
+      base = File.basename(filename.to_s)
+      base.gsub(/[^0-9A-Za-z.\-]/, "_")
     end
 
     # 序列化报告数据

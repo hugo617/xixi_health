@@ -4,6 +4,8 @@
 #
 # 遵循Service Object模式，负责业务逻辑、数据验证和数据库操作
 
+require "fileutils"
+
 module Reports
   class UpdateService
     # 允许更新的字段
@@ -14,6 +16,12 @@ module Reports
     
     # 允许的文件扩展名
     ALLOWED_FILE_EXTENSIONS = %w[pdf doc docx txt xls xlsx].freeze
+
+    # 上传目录（相对于 Rails.root）
+    UPLOAD_BASE_DIR = Rails.root.join("public", "uploads", "reports").freeze
+
+    # 单个上传文件的最大大小（10MB）
+    MAX_UPLOAD_FILE_SIZE = 10.megabytes
     
     # 服务对象的入口点
     # @param params [Hash] 更新参数，包含 report_id 和需要更新的字段
@@ -27,6 +35,7 @@ module Reports
     def initialize(params = {})
       @report_id = params[:report_id]
       report_params = params[:report] || {}
+      @uploaded_file = report_params[:file] || report_params["file"]
       @update_params = report_params.is_a?(Hash) ? report_params.symbolize_keys.slice(*ALLOWED_UPDATE_FIELDS) : {}
     end
 
@@ -42,6 +51,10 @@ module Reports
       
       # 验证更新参数
       return { success: false, data: nil, error: "没有提供有效的更新字段" } if @update_params.empty?
+
+      # 如果有上传文件，先处理文件上传，生成并填充 file_path / file_size
+      upload_result = handle_file_upload(report)
+      return upload_result unless upload_result[:success]
       
       # 验证更新字段
       validation_result = validate_update_params(report)
@@ -73,6 +86,46 @@ module Reports
     end
 
     private
+
+    # 处理文件上传（可选）
+    # @param report [Report] 报告对象
+    # @return [Hash] 标准化服务响应格式；如果没有上传文件则返回 success: true
+    def handle_file_upload(report)
+      return { success: true, data: nil, error: nil } if @uploaded_file.blank?
+
+      unless pdf_file?(@uploaded_file)
+        return { success: false, data: nil, error: "只支持上传PDF文件" }
+      end
+
+      if @uploaded_file.size.to_i > MAX_UPLOAD_FILE_SIZE
+        return { success: false, data: nil, error: "文件大小不能超过#{MAX_UPLOAD_FILE_SIZE / 1.megabyte}MB" }
+      end
+
+      FileUtils.mkdir_p(UPLOAD_BASE_DIR) unless Dir.exist?(UPLOAD_BASE_DIR)
+
+      sanitized_name = sanitize_filename(@uploaded_file.original_filename)
+      timestamp = Time.current.strftime("%Y%m%d%H%M%S")
+      stored_name = "#{timestamp}_#{sanitized_name}"
+
+      absolute_path = UPLOAD_BASE_DIR.join(stored_name)
+      relative_path = "/uploads/reports/#{stored_name}"
+
+      File.open(absolute_path, "wb") do |file|
+        file.write(@uploaded_file.read)
+      end
+
+      # 删除旧文件（如果在受管目录内）
+      delete_file_if_exists(report.file_path)
+
+      @update_params[:file_path] = relative_path
+      @update_params[:file_size] = @uploaded_file.size.to_i
+
+      { success: true, data: nil, error: nil }
+    rescue StandardError => e
+      Rails.logger.error "Reports::UpdateService file upload error: #{e.class} - #{e.message}"
+      Rails.logger.error e.backtrace.join("\n")
+      { success: false, data: nil, error: "文件上传失败，请稍后重试" }
+    end
 
     # 验证更新参数
     # @param report [Report] 报告对象
@@ -142,6 +195,38 @@ module Reports
       # 检查路径格式和扩展名
       extension = File.extname(file_path).downcase[1..-1]
       file_path.match?(/\A\/.+\.(#{ALLOWED_FILE_EXTENSIONS.join('|')})\z/i) && ALLOWED_FILE_EXTENSIONS.include?(extension)
+    end
+
+    # 判断上传文件是否为 PDF
+    # @param uploaded_file [ActionDispatch::Http::UploadedFile]
+    # @return [Boolean]
+    def pdf_file?(uploaded_file)
+      return false if uploaded_file.blank?
+
+      content_type = uploaded_file.content_type.to_s.downcase
+      return true if content_type == "application/pdf"
+
+      File.extname(uploaded_file.original_filename.to_s).downcase == ".pdf"
+    end
+
+    # 清理文件名，防止路径遍历
+    # @param filename [String]
+    # @return [String]
+    def sanitize_filename(filename)
+      base = File.basename(filename.to_s)
+      base.gsub(/[^0-9A-Za-z.\-]/, "_")
+    end
+
+    # 删除物理文件（仅限受管目录）
+    # @param file_path [String]
+    def delete_file_if_exists(file_path)
+      return if file_path.blank?
+      return unless file_path.start_with?("/uploads/reports/")
+
+      absolute_path = Rails.root.join("public", file_path.delete_prefix("/"))
+      File.delete(absolute_path) if File.exist?(absolute_path)
+    rescue StandardError => e
+      Rails.logger.warn "Reports::UpdateService delete file warning: #{e.class} - #{e.message}"
     end
 
     # 序列化报告数据

@@ -50,6 +50,7 @@ module Reports
       
       # 执行软删除
       if report.update(deleted_at: Time.current)
+        delete_file_if_exists(report.file_path)
         Rails.logger.info "Reports::DeleteReport - Report #{@report_id} soft deleted successfully"
         {
           success: true,
@@ -75,6 +76,20 @@ module Reports
       Rails.logger.error "Reports::DeleteReport error: #{e.class} - #{e.message}"
       Rails.logger.error e.backtrace.join("\n")
       { success: false, data: nil, error: "删除失败，请稍后重试" }
+    end
+
+    private
+
+    # 删除物理文件（仅限受管目录）
+    # @param file_path [String]
+    def delete_file_if_exists(file_path)
+      return if file_path.blank?
+      return unless file_path.start_with?("/uploads/reports/")
+
+      absolute_path = Rails.root.join("public", file_path.delete_prefix("/"))
+      File.delete(absolute_path) if File.exist?(absolute_path)
+    rescue StandardError => e
+      Rails.logger.warn "Reports::DeleteService delete file warning: #{e.class} - #{e.message}"
     end
   end
 end

@@ -100,7 +100,9 @@ module Api
       # 创建参数定义
       # @return [Hash] 允许的创建参数
       def create_params
-        params.permit(report: [:user_id, :report_type, :status, :file_path, :report_date, :file_size, :description]).to_h
+        params.permit(
+          report: [:user_id, :report_type, :status, :file_path, :report_date, :file_size, :description, :file]
+        ).to_h.deep_symbolize_keys
       end
 
       # 更新参数定义
@@ -108,14 +110,14 @@ module Api
       def update_params
         {
           report_id: params[:report_id],
-          report: params[:report]&.permit(:report_type, :status, :file_path, :report_date, :file_size, :description)&.to_h
+          report: params[:report]&.permit(:report_type, :status, :file_path, :report_date, :file_size, :description, :file)&.to_h
         }.compact
       end
 
       # 删除参数定义
       # @return [Hash] 允许的删除参数
       def delete_params
-        params.permit(:report_id).to_h
+        params.permit(:report_id).to_h.symbolize_keys
       end
     end
   end

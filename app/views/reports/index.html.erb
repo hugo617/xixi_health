@@ -1108,8 +1108,8 @@
                 </div>
                 <div class="form-group">
                     <label class="form-label">文件附件 <span class="required-indicator">*</span></label>
-                    <input type="file" id="upFile" class="form-input file-input" accept=".pdf,.doc,.docx,.txt,.xls,.xlsx,.jpg,.jpeg,.png" required>
-                    <small class="form-help">支持 PDF、Word、Excel、文本文件和图片格式，最大 100MB</small>
+                    <input type="file" id="upFile" class="form-input file-input" accept=".pdf,application/pdf" required>
+                    <small class="form-help">仅支持 PDF 文件，最大 10MB</small>
                     <div id="filePreview" class="file-preview" style="display: none;">
                         <div class="file-info">
                             <span id="fileName"></span>
@@ -1858,10 +1858,9 @@
         // 查看报告详情
         function viewReport(id) {
             const report = appState.reports.find(r => r.id === id);
-            if (report) {
-                // 这里可以添加查看详情的逻辑，比如打开新页面或显示模态框
-                showNotification(`查看报告: ${getReportTypeText(report.report_type)}`, 'info');
-            }
+            if (!report) return;
+            // 这里可以添加查看详情的逻辑，比如打开新页面或显示模态框
+            showNotification(`查看报告: ${getReportTypeText(report.report_type)}`, 'info');
         }
 
         // 删除报告
@@ -1884,16 +1883,21 @@
                         body: JSON.stringify({ report_id: id })
                     });
 
-                    if (response.ok) {
-                        const result = await response.json();
-                        if (result.success) {
-                            showNotification('报告删除成功', 'success');
-                            loadReports(); // 重新加载数据
-                        } else {
-                            throw new Error(result.error || '删除失败');
-                        }
+                    let result;
+                    try {
+                        result = await response.json();
+                    } catch (e) {
+                        result = null;
+                    }
+
+                    if (response.ok && result && result.success) {
+                        showNotification('报告删除成功', 'success');
+                        loadReports(); // 重新加载数据
                     } else {
-                        throw new Error('删除请求失败');
+                        const errorMessage =
+                          (result && result.error) ||
+                          (response.ok ? '删除失败' : '删除请求失败');
+                        throw new Error(errorMessage);
                     }
                 } catch (error) {
                     console.error('Failed to delete report:', error);
@@ -2200,29 +2204,19 @@
             const file = e.target.files[0];
             if (!file) return;
             
-            // 文件验证
-            const validTypes = [
-                'application/pdf',
-                'application/msword',
-                'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-                'text/plain',
-                'application/vnd.ms-excel',
-                'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-                'image/jpeg',
-                'image/jpg',
-                'image/png'
-            ];
+            // 仅支持 PDF
+            const isPdfType = file.type === 'application/pdf';
+            const isPdfName = file.name.toLowerCase().endsWith('.pdf');
+            const maxSize = 10 * 1024 * 1024; // 10MB
             
-            const maxSize = 100 * 1024 * 1024; // 100MB
-            
-            if (!validTypes.includes(file.type)) {
-                showNotification('不支持的文件格式，请选择有效的文件类型', 'error');
+            if (!isPdfType && !isPdfName) {
+                showNotification('仅支持上传 PDF 文件', 'error');
                 e.target.value = '';
                 return;
             }
             
             if (file.size > maxSize) {
-                showNotification('文件大小不能超过 100MB', 'error');
+                showNotification('文件大小不能超过 10MB', 'error');
                 e.target.value = '';
                 return;
             }
@@ -2281,36 +2275,25 @@
             submitBtn.disabled = true;
             
             try {
-                // 创建报告数据 - 使用已选择的用户ID
-                const reportData = {
-                    report: {
-                        user_id: parseInt(userId),
-                        report_type: getReportTypeValue(type),
-                        file_path: `/uploads/reports/${Date.now()}_${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`,
-                        file_size: file.size,
-                        status: 'pending_generation',
-                        description: `上传文件: ${file.name}`,
-                        report_date: new Date().toISOString().split('T')[0]
-                    }
-                };
+                const formData = new FormData();
+                formData.append('report[user_id]', parseInt(userId, 10));
+                formData.append('report[report_type]', getReportTypeValue(type));
+                formData.append('report[status]', 'pending_generation');
+                formData.append('report[description]', `上传文件: ${file.name}`);
+                formData.append('report[report_date]', new Date().toISOString().split('T')[0]);
+                formData.append('report[file]', file);
                 
                 const createResponse = await fetch(`${API_BASE}/reports/create`, {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json',
                         'X-CSRF-Token': getCsrfToken()
                     },
-                    body: JSON.stringify(reportData)
+                    body: formData
                 });
                 
-                if (!createResponse.ok) {
-                    const errorData = await createResponse.json().catch(() => ({ error: '创建报告失败' }));
-                    throw new Error(errorData.error || '创建报告失败');
-                }
+                const result = await createResponse.json().catch(() => null);
                 
-                const result = await createResponse.json();
-                if (result.success) {
+                if (createResponse.ok && result && result.success) {
                     showNotification('🎉 报告创建成功', 'success');
                     closeModal('uploadModal');
                     
@@ -2319,9 +2302,11 @@
                         loadReports();
                     }, 1000);
                 } else {
-                    throw new Error(result.error || '创建报告失败');
+                    const errorMessage =
+                      (result && result.error) ||
+                      (createResponse.ok ? '创建报告失败' : '创建请求失败');
+                    throw new Error(errorMessage);
                 }
-                
             } catch (error) {
                 console.error('Upload failed:', error);
                 showNotification(`上传失败: ${error.message}`, 'error');

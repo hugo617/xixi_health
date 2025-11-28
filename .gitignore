@@ -58,3 +58,7 @@ tmp/*
 /identify
 /Requirement
 /temp
+
+上传附件
+/public/uploads/reports/
+
