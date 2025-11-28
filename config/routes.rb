@@ -8,6 +8,13 @@ Rails.application.routes.draw do
   get "reports" => "reports#index"
   get "reports/:id/preview", to: "reports#preview", as: :report_preview
   get "reports/:id/download", to: "reports#download", as: :report_download
+
+  # H5 移动端个人报告页面
+  namespace :h5 do
+    resources :users, only: [] do
+      resource :profile, only: :show, controller: "profiles"
+    end
+  end
   
   # API路由配置
   namespace :api do

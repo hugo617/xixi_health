@@ -1,0 +1,1096 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <%= csrf_meta_tags %>
+  <title>我的健康报告 - H5</title>
+  <style>
+    :root {
+      --primary: #10b981;
+      --primary-hover: #059669;
+      --bg-color: #f0fdf4;
+      --text-main: #111827;
+      --text-sub: #6b7280;
+      --glass-bg: rgba(255, 255, 255, 0.9);
+      --glass-border: rgba(255, 255, 255, 0.9);
+      --glass-blur: 20px;
+      --radius: 20px;
+      --card-shadow: 0 20px 40px -16px rgba(16, 185, 129, 0.25);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      padding: 16px 0;
+      background-image:
+        radial-gradient(var(--primary) 1.5px, transparent 1.5px),
+        radial-gradient(rgba(16, 185, 129, 0.3) 1px, transparent 1px);
+      background-size: 32px 32px, 12px 12px;
+      background-position: 0 0, 16px 16px;
+    }
+
+    .h5-page {
+      width: 100%;
+      max-width: 640px;
+      padding: 0 12px;
+    }
+
+    .h5-container {
+      width: 100%;
+      border-radius: var(--radius);
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      backdrop-filter: blur(var(--glass-blur));
+      -webkit-backdrop-filter: blur(var(--glass-blur));
+      box-shadow: var(--card-shadow), inset 0 0 0 1px rgba(255, 255, 255, 0.4);
+      padding: 18px 16px 20px;
+    }
+
+    .h5-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+
+    .h5-title-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .h5-logo-box {
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #6ee7b7, #10b981);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #ffffff;
+      font-weight: 700;
+      font-size: 0.9rem;
+      box-shadow: 0 8px 16px rgba(16, 185, 129, 0.4);
+    }
+
+    .h5-title-text h1 {
+      font-size: 1.1rem;
+      font-weight: 800;
+      background: linear-gradient(to right, #064e3b, #10b981);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: -0.3px;
+    }
+
+    .h5-title-text p {
+      font-size: 0.8rem;
+      color: var(--text-sub);
+      margin-top: 2px;
+    }
+
+    .profile-card {
+      margin-top: 8px;
+      padding: 14px 12px 12px;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.9);
+      border: 1px solid rgba(229, 231, 235, 0.9);
+      box-shadow: 0 12px 30px rgba(16, 185, 129, 0.12);
+      position: relative;
+    }
+
+    .profile-main {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .profile-avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #a7f3d0, #34d399);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #065f46;
+      font-weight: 700;
+      font-size: 1rem;
+      flex-shrink: 0;
+    }
+
+    .profile-main-text {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .profile-name-line {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 4px;
+    }
+
+    .profile-name {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #022c22;
+    }
+
+    .membership-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 0.7rem;
+      font-weight: 600;
+    }
+
+    .membership-session_card { background: #fef3c7; color: #92400e; }
+    .membership-monthly_card { background: #ddd6fe; color: #7c3aed; }
+    .membership-annual_card { background: #a7f3d0; color: #047857; }
+    .membership-no_membership { background: #f3f4f6; color: #6b7280; }
+
+    .profile-sub {
+      font-size: 0.78rem;
+      color: var(--text-sub);
+    }
+
+    .profile-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 6px;
+      font-size: 0.75rem;
+      color: var(--text-sub);
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 0.7rem;
+      font-weight: 600;
+    }
+
+    .status-active { background: #dcfce7; color: #15803d; }
+    .status-inactive { background: #f3f4f6; color: #4b5563; }
+
+    .role-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 0.7rem;
+      font-weight: 600;
+    }
+
+    .role-admin { background: #dbeafe; color: #1e40af; }
+    .role-user { background: #f0f9ff; color: #0369a1; }
+
+    .btn-edit-inline {
+      padding: 6px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(15, 118, 110, 0.25);
+      background: #ecfdf5;
+      color: #047857;
+      font-size: 0.8rem;
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      cursor: pointer;
+    }
+
+    .btn-edit-inline:hover {
+      background: #d1fae5;
+      border-color: #10b981;
+    }
+
+    .profile-contact {
+      margin-top: 10px;
+      padding-top: 8px;
+      border-top: 1px dashed rgba(209, 213, 219, 0.9);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-size: 0.78rem;
+      color: var(--text-sub);
+    }
+
+    .contact-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .contact-label {
+      min-width: 48px;
+      color: #6b7280;
+    }
+
+    .contact-value {
+      flex: 1;
+      min-width: 0;
+      color: #111827;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .section-title-row {
+      margin-top: 18px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .section-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #064e3b;
+    }
+
+    .btn-refresh {
+      border-radius: 999px;
+      border: 1px solid rgba(16, 185, 129, 0.35);
+      padding: 4px 10px;
+      font-size: 0.78rem;
+      background: #ffffff;
+      color: #047857;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      cursor: pointer;
+    }
+
+    .btn-refresh:hover {
+      background: #ecfdf5;
+    }
+
+    .report-list-card {
+      margin-top: 4px;
+      padding: 10px 12px 4px;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.9);
+      border: 1px solid rgba(229, 231, 235, 0.9);
+    }
+
+    .report-list {
+      margin-top: 6px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .report-item {
+      border-radius: 14px;
+      border: 1px solid rgba(229, 231, 235, 0.9);
+      padding: 8px 10px;
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+    }
+
+    .report-item-main {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .report-date-line {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 4px;
+    }
+
+    .report-date {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #022c22;
+    }
+
+    .report-status-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 0.7rem;
+      font-weight: 600;
+    }
+
+    .status-pending-generation { background: #fef3c7; color: #92400e; }
+    .status-under-review { background: #dbeafe; color: #1e40af; }
+    .status-normal-result { background: #dcfce7; color: #15803d; }
+    .status-abnormal-mild { background: #fed7aa; color: #c2410c; }
+    .status-abnormal-moderate { background: #fdba74; color: #9a3412; }
+    .status-abnormal-severe { background: #fca5a5; color: #b91c1c; }
+    .status-pending-supplement { background: #e0e7ff; color: #4338ca; }
+    .status-pending-revision { background: #f3e8ff; color: #7c3aed; }
+
+    .report-type-line {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.78rem;
+      color: var(--text-sub);
+    }
+
+    .report-type-tag {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: #f0f9ff;
+      border: 1px solid #bae6fd;
+      font-size: 0.72rem;
+      color: #0369a1;
+      font-weight: 500;
+    }
+
+    .report-desc {
+      margin-top: 4px;
+      font-size: 0.78rem;
+      color: var(--text-sub);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .report-item-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      align-items: flex-end;
+    }
+
+    .btn-icon {
+      padding: 6px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(209, 213, 219, 0.9);
+      background: #ffffff;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    .btn-icon svg {
+      width: 16px;
+      height: 16px;
+      stroke: #374151;
+    }
+
+    .btn-icon.preview {
+      border-color: rgba(16, 185, 129, 0.4);
+      background: #ecfdf5;
+    }
+
+    .btn-icon.preview svg {
+      stroke: #047857;
+    }
+
+    .btn-icon.download {
+      border-color: rgba(37, 99, 235, 0.35);
+      background: #eff6ff;
+    }
+
+    .btn-icon.download svg {
+      stroke: #1d4ed8;
+    }
+
+    .empty-state,
+    .loading-state,
+    .error-state {
+      padding: 16px 4px;
+      text-align: center;
+      font-size: 0.85rem;
+      color: var(--text-sub);
+    }
+
+    .error-state {
+      color: #b91c1c;
+    }
+
+    .load-more {
+      margin-top: 4px;
+      text-align: center;
+    }
+
+    .btn-load-more {
+      padding: 6px 14px;
+      border-radius: 999px;
+      border: 1px solid rgba(16, 185, 129, 0.5);
+      background: #ffffff;
+      font-size: 0.78rem;
+      color: #047857;
+      cursor: pointer;
+    }
+
+    .btn-load-more:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .h5-modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.45);
+      display: none;
+      justify-content: center;
+      align-items: flex-end;
+      z-index: 200;
+    }
+
+    .h5-modal-overlay.show {
+      display: flex;
+    }
+
+    .h5-modal-sheet {
+      width: 100%;
+      max-width: 640px;
+      border-radius: 18px 18px 0 0;
+      background: #ffffff;
+      padding: 16px 16px 14px;
+      box-shadow: 0 -12px 30px rgba(0, 0, 0, 0.18);
+      animation: slideUp 0.25s ease-out;
+    }
+
+    @keyframes slideUp {
+      from {
+        transform: translateY(20px);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    .sheet-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+
+    .sheet-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #111827;
+    }
+
+    .sheet-close-btn {
+      border: none;
+      background: none;
+      font-size: 1.2rem;
+      line-height: 1;
+      cursor: pointer;
+      color: #6b7280;
+    }
+
+    .form-group {
+      margin-bottom: 10px;
+    }
+
+    .form-label {
+      display: block;
+      margin-bottom: 4px;
+      font-size: 0.8rem;
+      color: var(--text-sub);
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 8px 10px;
+      border-radius: 10px;
+      border: 1px solid #e5e7eb;
+      font-size: 0.85rem;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .form-input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+    }
+
+    .form-help {
+      display: block;
+      margin-top: 2px;
+      font-size: 0.7rem;
+      color: var(--text-sub);
+    }
+
+    .sheet-footer {
+      margin-top: 8px;
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+
+    .btn-cancel {
+      padding: 8px 14px;
+      border-radius: 999px;
+      border: 1px solid #e5e7eb;
+      background: #f9fafb;
+      font-size: 0.8rem;
+      cursor: pointer;
+      color: #374151;
+    }
+
+    .btn-save {
+      padding: 8px 14px;
+      border-radius: 999px;
+      border: none;
+      background: var(--primary);
+      color: #ffffff;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .btn-save:disabled {
+      opacity: 0.7;
+      cursor: wait;
+    }
+
+    .notification {
+      position: fixed;
+      top: 16px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-120%);
+      padding: 10px 14px;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 500;
+      z-index: 300;
+      background: rgba(220, 252, 231, 0.96);
+      color: #15803d;
+      border: 1px solid rgba(34, 197, 94, 0.4);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+      opacity: 0;
+      transition: opacity 0.2s, transform 0.2s;
+    }
+
+    .notification.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .notification.error {
+      background: rgba(254, 226, 226, 0.96);
+      color: #b91c1c;
+      border-color: rgba(239, 68, 68, 0.4);
+    }
+
+    @media (max-width: 480px) {
+      .h5-container {
+        padding: 14px 12px 16px;
+      }
+
+      .profile-card,
+      .report-list-card {
+        padding-inline: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="h5-page">
+    <div
+      class="h5-container"
+      id="h5ProfileRoot"
+      data-user-id="<%= @user&.id %>"
+      data-has-user="<%= @user.present? %>">
+
+      <div class="h5-header">
+        <div class="h5-title-group">
+          <div class="h5-logo-box">XR</div>
+          <div class="h5-title-text">
+            <h1>我的健康报告</h1>
+            <p>随时随地查看个人体检结果</p>
+          </div>
+        </div>
+      </div>
+
+      <% if @error_message.present? %>
+        <div class="profile-card">
+          <div class="empty-state">
+            <p><%= @error_message %></p>
+          </div>
+        </div>
+      <% else %>
+        <section class="profile-card" id="profileCard">
+          <div class="profile-main">
+            <div class="profile-avatar" id="profileAvatar">
+              <% initials = (@user&.nickname.presence || @user&.email.presence || "U").strip[0]&.upcase %>
+              <%= initials %>
+            </div>
+            <div class="profile-main-text">
+              <div class="profile-name-line">
+                <div class="profile-name" id="profileName">
+                  <%= @user&.nickname.presence || "未命名用户" %>
+                </div>
+                <% if @user.present? %>
+                  <span class="membership-badge membership-<%= @user.membership_type %>" id="profileMembership">
+                    <%= @user.membership_type %>
+                  </span>
+                <% end %>
+              </div>
+              <div class="profile-sub" id="profileSub">
+                <%= @user&.email.presence || "暂无邮箱" %>
+              </div>
+              <div class="profile-tags">
+                <% if @user.present? %>
+                  <span class="status-badge status-<%= @user.status %>" id="profileStatus">
+                    <%= @user.status == "active" ? "已激活" : "已停用" %>
+                  </span>
+                  <span class="role-badge role-<%= @user.role %>" id="profileRole">
+                    <%= @user.role == "admin" ? "管理员" : "普通用户" %>
+                  </span>
+                <% end %>
+              </div>
+            </div>
+            <button type="button" class="btn-edit-inline" id="editProfileButton">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14l4-4h9a2 2 0 0 0 2-2v-3"></path>
+                <path d="M18.5 2.5 21.5 5.5 14 13H11v-3L18.5 2.5z"></path>
+              </svg>
+              编辑
+            </button>
+          </div>
+
+          <div class="profile-contact">
+            <div class="contact-row">
+              <span class="contact-label">手机</span>
+              <span class="contact-value" id="profilePhone">
+                <%= @user&.phone.presence || "未填写" %>
+              </span>
+            </div>
+            <div class="contact-row">
+              <span class="contact-label">邮箱</span>
+              <span class="contact-value" id="profileEmail">
+                <%= @user&.email.presence || "未填写" %>
+              </span>
+            </div>
+          </div>
+        </section>
+
+        <section class="report-list-card">
+          <div class="section-title-row">
+            <div class="section-title">我的报告列表</div>
+            <button type="button" class="btn-refresh" id="refreshReportsButton">
+              <span>刷新</span>
+            </button>
+          </div>
+          <div id="reportListContainer">
+            <div class="loading-state">🔄 正在加载报告...</div>
+          </div>
+        </section>
+      <% end %>
+    </div>
+  </div>
+
+  <% unless @error_message.present? %>
+    <div class="h5-modal-overlay" id="editProfileModal">
+      <div class="h5-modal-sheet">
+        <div class="sheet-header">
+          <div class="sheet-title">编辑个人信息</div>
+          <button type="button" class="sheet-close-btn" id="closeEditProfileButton">×</button>
+        </div>
+
+        <%= form_with url: "#", html: { id: "editProfileForm" } do |f| %>
+          <div class="form-group">
+            <label class="form-label" for="editNickname">姓名</label>
+            <%= f.text_field :nickname, id: "editNickname", class: "form-input",
+                             value: (@user&.nickname || ""), maxlength: 50 %>
+            <span class="form-help">用于在报告中显示的称呼</span>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="editPhone">手机号</label>
+            <%= f.telephone_field :phone, id: "editPhone", class: "form-input",
+                                  value: (@user&.phone || ""), maxlength: 20 %>
+            <span class="form-help">用于接收短信通知</span>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="editEmail">邮箱</label>
+            <%= f.email_field :email, id: "editEmail", class: "form-input",
+                              value: (@user&.email || ""), maxlength: 100 %>
+            <span class="form-help">用于接收报告与系统通知</span>
+          </div>
+
+          <div class="sheet-footer">
+            <button type="button" class="btn-cancel" id="cancelEditProfileButton">取消</button>
+            <button type="submit" class="btn-save" id="saveProfileButton">保存</button>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+
+  <div class="notification" id="h5Notification"></div>
+
+  <script>
+    const API_BASE = '/api/v1';
+
+    function getCsrfToken() {
+      const tokenElement = document.querySelector('meta[name="csrf-token"]');
+      return tokenElement ? tokenElement.content : '';
+    }
+
+    function showNotification(message, type = 'success') {
+      const el = document.getElementById('h5Notification');
+      if (!el) return;
+
+      el.textContent = message;
+      el.classList.remove('error');
+      if (type === 'error') {
+        el.classList.add('error');
+      }
+
+      el.classList.add('show');
+      setTimeout(() => {
+        el.classList.remove('show');
+      }, 2500);
+    }
+
+    function formatDate(dateString) {
+      if (!dateString) return '';
+      try {
+        const date = new Date(dateString);
+        if (Number.isNaN(date.getTime())) return dateString;
+        return date.toLocaleDateString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit' });
+      } catch (e) {
+        return dateString;
+      }
+    }
+
+    const reportTypeMap = {
+      'protein_test': '蛋白质检测',
+      'gene_test': '基因检测',
+      'blood_test': '血液检测',
+      'urine_test': '尿液检测',
+      'other_test': '其他检测'
+    };
+
+    const statusTextMap = {
+      'pending_generation': '待生成',
+      'under_review': '审核中',
+      'normal_result': '结果正常',
+      'abnormal_mild': '异常（轻度）',
+      'abnormal_moderate': '异常（中度）',
+      'abnormal_severe': '异常（重度）',
+      'pending_supplement': '待补充',
+      'pending_revision': '待修订'
+    };
+
+    function getReportTypeText(type) {
+      return reportTypeMap[type] || type || '未知类型';
+    }
+
+    function getStatusBadgeClass(status) {
+      return `status-${(status || '').replace(/_/g, '-')}`;
+    }
+
+    function getStatusText(status) {
+      return statusTextMap[status] || status || '未知状态';
+    }
+
+    let reportsState = {
+      page: 1,
+      perPage: 10,
+      totalPages: 1,
+      isLoading: false
+    };
+
+    async function loadReportsForUser(userId, options = {}) {
+      if (!userId) return;
+      if (reportsState.isLoading) return;
+
+      const container = document.getElementById('reportListContainer');
+      const page = options.page || 1;
+
+      reportsState.isLoading = true;
+      if (page === 1 && container) {
+        container.innerHTML = '<div class="loading-state">🔄 正在加载报告...</div>';
+      }
+
+      try {
+        const response = await fetch(`${API_BASE}/reports/search`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-CSRF-Token': getCsrfToken()
+          },
+          body: JSON.stringify({
+            filters: { user_id: userId },
+            pagination: { page: page, per_page: reportsState.perPage }
+          })
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+
+        const data = await response.json();
+        if (!data.success) {
+          throw new Error(data.error || '加载报告失败');
+        }
+
+        const reports = data.data.reports || [];
+        const pagination = data.data.pagination || {};
+        reportsState.page = pagination.current_page || page;
+        reportsState.totalPages = pagination.total_pages || 1;
+
+        renderReportList(page === 1, reports);
+      } catch (error) {
+        console.error('loadReportsForUser error', error);
+        if (container) {
+          container.innerHTML = `<div class="error-state">❌ 加载报告失败，请稍后重试</div>`;
+        }
+      } finally {
+        reportsState.isLoading = false;
+      }
+    }
+
+    function renderReportList(reset, reports) {
+      const container = document.getElementById('reportListContainer');
+      if (!container) return;
+
+      let listEl = container.querySelector('.report-list');
+      if (reset || !listEl) {
+        container.innerHTML = '';
+        listEl = document.createElement('div');
+        listEl.className = 'report-list';
+        container.appendChild(listEl);
+      }
+
+      if (reset) {
+        listEl.innerHTML = '';
+      }
+
+      if (reports.length === 0 && reset) {
+        container.innerHTML = '<div class="empty-state">🍂 暂无健康报告</div>';
+        return;
+      }
+
+      reports.forEach((report) => {
+        const item = document.createElement('div');
+        item.className = 'report-item';
+
+        const date = formatDate(report.report_date || report.created_at);
+        const typeText = getReportTypeText(report.report_type);
+        const statusClass = getStatusBadgeClass(report.status);
+        const statusText = getStatusText(report.status);
+        const desc = report.description || '';
+
+        item.innerHTML = `
+          <div class="report-item-main">
+            <div class="report-date-line">
+              <span class="report-date">${date || '未知日期'}</span>
+              <span class="report-status-badge ${statusClass}">${statusText}</span>
+            </div>
+            <div class="report-type-line">
+              <span class="report-type-tag">${typeText}</span>
+            </div>
+            ${desc ? `<div class="report-desc" title="${desc}">${desc}</div>` : ''}
+          </div>
+          <div class="report-item-actions">
+            <button class="btn-icon preview" title="预览报告" aria-label="预览报告" onclick="openReportPreview(${report.id})">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12Z"></path>
+                <circle cx="12" cy="12" r="3"></circle>
+              </svg>
+            </button>
+            <button class="btn-icon download" title="下载报告" aria-label="下载报告" onclick="downloadReport(${report.id})">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <path d="M4 20h16"></path>
+                <path d="M12 4v12"></path>
+                <path d="m7 12 5 5 5-5"></path>
+              </svg>
+            </button>
+          </div>
+        `;
+
+        listEl.appendChild(item);
+      });
+
+      let loadMoreWrapper = container.querySelector('.load-more');
+      if (!loadMoreWrapper) {
+        loadMoreWrapper = document.createElement('div');
+        loadMoreWrapper.className = 'load-more';
+        container.appendChild(loadMoreWrapper);
+      }
+
+      if (reportsState.page < reportsState.totalPages) {
+        loadMoreWrapper.innerHTML = `
+          <button type="button" class="btn-load-more" id="loadMoreReportsButton">
+            加载更多
+          </button>
+        `;
+        const btn = document.getElementById('loadMoreReportsButton');
+        if (btn) {
+          btn.onclick = () => loadReportsForUser(
+            document.getElementById('h5ProfileRoot').dataset.userId,
+            { page: reportsState.page + 1 }
+          );
+        }
+      } else {
+        loadMoreWrapper.innerHTML = '';
+      }
+    }
+
+    function openReportPreview(id) {
+      if (!id) return;
+      const url = `/reports/${id}/preview`;
+      window.location.href = url;
+    }
+
+    function downloadReport(id) {
+      if (!id) return;
+      const url = `/reports/${id}/download`;
+      window.location.href = url;
+    }
+
+    function openEditProfileModal() {
+      const overlay = document.getElementById('editProfileModal');
+      if (!overlay) return;
+      overlay.classList.add('show');
+    }
+
+    function closeEditProfileModal() {
+      const overlay = document.getElementById('editProfileModal');
+      if (!overlay) return;
+      overlay.classList.remove('show');
+    }
+
+    async function handleProfileSubmit(event) {
+      event.preventDefault();
+      const root = document.getElementById('h5ProfileRoot');
+      if (!root || root.dataset.hasUser !== 'true') return;
+
+      const userId = root.dataset.userId;
+      if (!userId) return;
+
+      const nicknameInput = document.getElementById('editNickname');
+      const phoneInput = document.getElementById('editPhone');
+      const emailInput = document.getElementById('editEmail');
+      const saveButton = document.getElementById('saveProfileButton');
+
+      const payload = {
+        user_id: userId,
+        user: {
+          nickname: nicknameInput ? nicknameInput.value.trim() : null,
+          phone: phoneInput ? phoneInput.value.trim() : null,
+          email: emailInput ? emailInput.value.trim() : null
+        }
+      };
+
+      if (saveButton) {
+        saveButton.disabled = true;
+      }
+
+      try {
+        const response = await fetch(`${API_BASE}/users/update`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-CSRF-Token': getCsrfToken()
+          },
+          body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+
+        const data = await response.json();
+        if (!data.success) {
+          throw new Error(data.error || '更新个人信息失败');
+        }
+
+        const user = data.data || {};
+        const nameEl = document.getElementById('profileName');
+        const subEl = document.getElementById('profileSub');
+        const phoneEl = document.getElementById('profilePhone');
+        const emailEl = document.getElementById('profileEmail');
+
+        if (nameEl) nameEl.textContent = user.nickname || '未命名用户';
+        if (subEl) subEl.textContent = user.email || '暂无邮箱';
+        if (phoneEl) phoneEl.textContent = user.phone || '未填写';
+        if (emailEl) emailEl.textContent = user.email || '未填写';
+
+        const avatarEl = document.getElementById('profileAvatar');
+        if (avatarEl && user.nickname) {
+          avatarEl.textContent = user.nickname.trim().charAt(0).toUpperCase();
+        }
+
+        showNotification('个人信息已更新');
+        closeEditProfileModal();
+      } catch (error) {
+        console.error('handleProfileSubmit error', error);
+        showNotification(error.message || '更新失败，请稍后重试', 'error');
+      } finally {
+        if (saveButton) {
+          saveButton.disabled = false;
+        }
+      }
+    }
+
+    function initializeH5ProfilePage() {
+      const root = document.getElementById('h5ProfileRoot');
+      if (!root) return;
+      if (root.dataset.hasUser !== 'true') return;
+
+      const userId = root.dataset.userId;
+      if (!userId) return;
+
+      const editButton = document.getElementById('editProfileButton');
+      const closeButton = document.getElementById('closeEditProfileButton');
+      const cancelButton = document.getElementById('cancelEditProfileButton');
+      const refreshButton = document.getElementById('refreshReportsButton');
+      const form = document.getElementById('editProfileForm');
+
+      if (editButton) {
+        editButton.addEventListener('click', openEditProfileModal);
+      }
+      if (closeButton) {
+        closeButton.addEventListener('click', closeEditProfileModal);
+      }
+      if (cancelButton) {
+        cancelButton.addEventListener('click', closeEditProfileModal);
+      }
+      if (form) {
+        form.addEventListener('submit', handleProfileSubmit);
+      }
+      if (refreshButton) {
+        refreshButton.addEventListener('click', () => loadReportsForUser(userId, { page: 1 }));
+      }
+
+      loadReportsForUser(userId, { page: 1 });
+    }
+
+    document.addEventListener('DOMContentLoaded', initializeH5ProfilePage);
+    document.addEventListener('turbo:load', initializeH5ProfilePage);
+  </script>
+</body>
+</html>
+
