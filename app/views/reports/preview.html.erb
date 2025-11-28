@@ -1,0 +1,190 @@
+<% content_for :title, "报告预览 - Xixi Health" %>
+
+<style>
+  .report-preview-page {
+    min-height: 100vh;
+    padding: 12px;
+    background-color: #00000099;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .report-preview-container {
+    width: 90vw;
+    height: 90vh;
+    background: rgba(255, 255, 255, 0.96);
+    border-radius: 20px;
+    box-shadow: 0 25px 50px -12px rgba(16, 185, 129, 0.15);
+    padding: 24px;
+    border: 1px solid rgba(209, 250, 229, 0.8);
+    display: flex;
+    flex-direction: column;
+  }
+
+  .preview-header {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-bottom: 16px;
+  }
+
+  .preview-header h1 {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #064e3b;
+  }
+
+  .preview-meta {
+    font-size: 0.9rem;
+    color: #6b7280;
+  }
+
+  .preview-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  .btn-preview-download,
+  .btn-preview-back {
+    padding: 8px 16px;
+    border-radius: 999px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    border: 1px solid transparent;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .btn-preview-download {
+    background-color: #10b981;
+    border-color: #059669;
+    color: #ffffff;
+  }
+
+  .btn-preview-download:hover {
+    background-color: #059669;
+  }
+
+  .btn-preview-back {
+    background-color: #f9fafb;
+    border-color: #e5e7eb;
+    color: #374151;
+  }
+
+  .btn-preview-back:hover {
+    background-color: #f3f4f6;
+  }
+
+  .preview-frame-wrapper {
+    width: 100%;
+    flex: 1 1 auto;
+    min-height: 0;
+    border-radius: 16px;
+    overflow: auto;
+    border: 1px solid rgba(209, 213, 219, 0.8);
+    background: #111827;
+  }
+
+  .preview-frame-wrapper iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+  }
+
+  .preview-fallback {
+    margin-top: 12px;
+    font-size: 0.85rem;
+    color: #6b7280;
+  }
+
+  .preview-error {
+    padding: 24px;
+    border-radius: 16px;
+    background-color: #fef2f2;
+    border: 1px solid #fecaca;
+    color: #b91c1c;
+  }
+
+  .preview-error p {
+    margin-bottom: 8px;
+  }
+
+  .preview-error-hint {
+    font-size: 0.85rem;
+    color: #9f1239;
+  }
+
+  @media (max-width: 768px) {
+    .report-preview-container {
+      padding: 16px;
+      width: 95vw;
+      height: 90vh;
+    }
+
+    .preview-frame-wrapper {
+      min-height: 0;
+    }
+  }
+</style>
+
+<div class="report-preview-page">
+  <div class="report-preview-container">
+    <% if @error_message.present? %>
+      <div class="preview-header">
+        <h1>报告预览</h1>
+      </div>
+      <div class="preview-error">
+        <p><%= @error_message %></p>
+        <p class="preview-error-hint">您可以返回报告列表重新尝试，或联系管理员处理。</p>
+        <div style="margin-top: 12px;">
+          <a href="<%= reports_path %>" class="btn-preview-back">返回报告列表</a>
+        </div>
+      </div>
+    <% else %>
+      <div class="preview-header">
+        <h1>报告预览</h1>
+        <% if @report.present? %>
+          <p class="preview-meta">
+            用户：
+            <%= @report.user&.nickname || @report.user&.email || "未知用户" %>
+            |
+            类型：
+            <%= @report.report_type %>
+            <% if @report.report_date.present? %>
+              |
+              日期：
+              <%= @report.report_date.strftime("%Y-%m-%d") rescue @report.report_date.to_s %>
+            <% end %>
+          </p>
+        <% end %>
+      </div>
+
+      <div class="preview-actions">
+        <% if @report.present? %>
+          <a href="<%= report_download_path(@report) %>" class="btn-preview-download" data-turbo="false">下载报告</a>
+        <% end %>
+        <a href="<%= reports_path %>" class="btn-preview-back">返回报告列表</a>
+      </div>
+
+      <% if @file_url.present? %>
+        <div class="preview-frame-wrapper">
+          <iframe src="<%= @file_url %>" title="报告PDF预览"></iframe>
+        </div>
+        <p class="preview-fallback">
+          如果浏览器无法直接预览 PDF，可以使用上方的“下载报告”按钮在本地打开。
+        </p>
+      <% else %>
+        <div class="preview-error">
+          <p>找不到可以预览的报告文件。</p>
+          <p class="preview-error-hint">请返回列表重新尝试，或联系管理员处理。</p>
+        </div>
+      <% end %>
+    <% end %>
+  </div>
+</div>

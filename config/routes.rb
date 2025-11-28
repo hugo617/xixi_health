@@ -6,6 +6,8 @@ Rails.application.routes.draw do
   get "login" => "login#index"
   get "users" => "users#index"
   get "reports" => "reports#index"
+  get "reports/:id/preview", to: "reports#preview", as: :report_preview
+  get "reports/:id/download", to: "reports#download", as: :report_download
   
   # API路由配置
   namespace :api do

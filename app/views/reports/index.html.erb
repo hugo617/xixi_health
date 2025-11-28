@@ -536,6 +536,23 @@
             transition: all 0.2s ease;
         }
         
+        .btn-preview {
+            background: #ecfdf5;
+            border-color: rgba(16, 185, 129, 0.4);
+            color: #047857;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding-inline: 10px;
+        }
+        
+        .btn-preview:hover {
+            background: #d1fae5;
+            border-color: #10b981;
+            color: #065f46;
+            transform: translateY(-1px);
+        }
+        
         .btn-edit { 
             background: white; 
             border-color: #e5e7eb; 
@@ -564,6 +581,11 @@
             display: flex;
             gap: 8px;
             align-items: center;
+        }
+
+        .preview-disabled {
+            font-size: 0.85rem;
+            color: var(--text-sub);
         }
 
         /* 状态徽章样式 */
@@ -1043,6 +1065,7 @@
                                 文件大小 <span id="icon-fileSize" class="sort-icon">⇅</span>
                             </th>
                             <th style="min-width: 200px;">报告描述</th>
+                            <th style="min-width: 120px; text-align: center;">预览</th>
                             <th onclick="sortTable('createdAt')" style="min-width: 140px;">
                                 创建时间 <span id="icon-createdAt" class="sort-icon">⇅</span>
                             </th>
@@ -1261,8 +1284,20 @@
             'abnormal': { text: '异常', class: 'status-abnormal' }
         };
 
-        document.addEventListener('DOMContentLoaded', () => {
-            console.log('DOMContentLoaded fired');
+        let reportsPageInitialized = false;
+
+        function initializeReportsPage() {
+            if (reportsPageInitialized) {
+                return;
+            }
+
+            // 仅在报告列表页面执行初始化
+            if (!document.getElementById('reportTable')) {
+                return;
+            }
+
+            reportsPageInitialized = true;
+            console.log('Reports page initialization');
             
             // 初始化筛选控件事件监听
             initializeFilterControls();
@@ -1309,7 +1344,10 @@
                     initializePaginationControls();
                 }
             }, 2000);
-        });
+        }
+
+        document.addEventListener('DOMContentLoaded', initializeReportsPage);
+        document.addEventListener('turbo:load', initializeReportsPage);
 
         // 初始化筛选控件事件监听
         function initializeFilterControls() {
@@ -1611,7 +1649,7 @@
         function showLoading() {
             const tbody = document.getElementById('tableBody');
             if (tbody) {
-                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:40px; color:#9ca3af;">🔄 正在加载报告数据...</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="10" style="text-align:center; padding:40px; color:#9ca3af;">🔄 正在加载报告数据...</td></tr>`;
             }
         }
 
@@ -1624,7 +1662,7 @@
         function showError(message) {
             const tbody = document.getElementById('tableBody');
             if (tbody) {
-                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:40px; color:#ef4444;">❌ ${message}</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="10" style="text-align:center; padding:40px; color:#ef4444;">❌ ${message}</td></tr>`;
             }
             
             // 显示通知
@@ -1642,7 +1680,7 @@
             tbody.innerHTML = '';
 
             if (!reports || reports.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="9" style="text-align:center; padding:40px; color:#9ca3af;">🍂 暂无匹配报告</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="10" style="text-align:center; padding:40px; color:#9ca3af;">🍂 暂无匹配报告</td></tr>`;
                 return;
             }
 
@@ -1682,6 +1720,9 @@
                     </td>
                     <td>
                         ${description ? `<div class="description-text" title="${description}">${description}</div>` : '-'}
+                    </td>
+                    <td style="text-align: center;">
+                        ${renderPreviewCell(report)}
                     </td>
                     <td>
                         <div class="timestamp">${createdAt}</div>
@@ -1753,6 +1794,35 @@
             const statusClass = `status-${status.replace(/_/g, '-')}`;
             const statusText = getStatusText(status);
             return `<span class="report-status-badge ${statusClass}">${statusText}</span>`;
+        }
+
+        function isPdfFile(path) {
+            if (!path) return false;
+            return path.toLowerCase().endsWith('.pdf');
+        }
+
+        function renderPreviewCell(report) {
+            const filePath = report.file_path || '';
+            if (!filePath) {
+                return '<span class="preview-disabled">暂无文件</span>';
+            }
+            if (!isPdfFile(filePath)) {
+                return '<span class="preview-disabled">仅支持PDF预览</span>';
+            }
+            return `
+                <button class="btn-action btn-preview" onclick="openPreview(${report.id})" title="预览 PDF" aria-label="预览 PDF 报告">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                        <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12Z"></path>
+                        <circle cx="12" cy="12" r="3"></circle>
+                    </svg>
+                </button>
+            `;
+        }
+
+        function openPreview(id) {
+            if (!id) return;
+            const url = `/reports/${id}/preview`;
+            window.open(url, '_blank', 'noopener');
         }
 
         // 处理搜索
