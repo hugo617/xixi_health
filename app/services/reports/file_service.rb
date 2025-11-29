@@ -4,8 +4,7 @@
 
 module Reports
   class FileService
-    # 受管上传目录（相对于 Rails.root）
-    UPLOAD_BASE_DIR = Rails.root.join("public", "uploads", "reports").freeze
+    LEGACY_PREFIX = "/uploads/reports/".freeze
 
     # 服务对象入口
     # @param params [Hash] 含 report_id
@@ -67,12 +66,58 @@ module Reports
     def managed_report_path?(file_path)
       return false if file_path.blank?
 
-      file_path.start_with?("/uploads/reports/")
+      value = file_path.to_s
+
+      # 禁止路径遍历
+      return false if value.include?("../") || value.include?("..\\")
+
+      # 兼容旧的 /uploads/reports/ 前缀
+      return true if value.start_with?(LEGACY_PREFIX)
+
+      # 新的存储结构：相对于 storage/reports 的相对路径
+      # 例如：user_1/a1b2c3d4-..._health_report.pdf
+      value !~ %r{\A/} && value !~ %r{://}
     end
 
     # 构建物理路径
     def build_absolute_path(file_path)
-      Rails.root.join("public", file_path.delete_prefix("/"))
+      value = file_path.to_s
+
+      if value.start_with?(LEGACY_PREFIX)
+        base_dir = Rails.root.join("public", "uploads", "reports")
+        relative = value.delete_prefix(LEGACY_PREFIX)
+        safe_join(base_dir, relative)
+      else
+        base_dir = storage_base_dir
+        relative = Pathname.new(value)
+        safe_join(base_dir, relative)
+      end
+    end
+
+    def storage_base_dir
+      configured = Rails.application.config.x.reports_storage
+      base_dir = configured&.base_dir || Rails.root.join("storage", "reports")
+      Pathname.new(base_dir)
+    end
+
+    def safe_join(base_dir, relative)
+      base = base_dir.exist? ? base_dir.realpath : base_dir
+      relative_path = relative.is_a?(Pathname) ? relative : Pathname.new(relative.to_s)
+
+      candidate = base.join(relative_path).cleanpath
+
+      if candidate.exist?
+        real = candidate.realpath
+        unless real.to_s.start_with?(base.to_s)
+          raise StandardError, "非法文件路径"
+        end
+        real
+      else
+        unless candidate.to_s.start_with?(base.to_s)
+          raise StandardError, "非法文件路径"
+        end
+        candidate
+      end
     end
 
     # 构建下载文件名
@@ -85,4 +130,3 @@ module Reports
     end
   end
 end
-

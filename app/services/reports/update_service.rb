@@ -12,7 +12,7 @@ module Reports
     ALLOWED_UPDATE_FIELDS = %i[report_type status file_path report_date file_size description].freeze
     
     # 默认文件大小限制
-    MAX_FILE_SIZE = 100.megabytes
+    MAX_FILE_SIZE = 200.megabytes
     
     # 允许的文件扩展名
     ALLOWED_FILE_EXTENSIONS = %w[pdf doc docx txt xls xlsx].freeze
@@ -20,8 +20,8 @@ module Reports
     # 上传目录（相对于 Rails.root）
     UPLOAD_BASE_DIR = Rails.root.join("public", "uploads", "reports").freeze
 
-    # 单个上传文件的最大大小（10MB）
-    MAX_UPLOAD_FILE_SIZE = 10.megabytes
+    # 单个上传文件的最大大小（200MB）
+    MAX_UPLOAD_FILE_SIZE = 200.megabytes
     
     # 服务对象的入口点
     # @param params [Hash] 更新参数，包含 report_id 和需要更新的字段
@@ -37,6 +37,7 @@ module Reports
       report_params = params[:report] || {}
       @uploaded_file = report_params[:file] || report_params["file"]
       @update_params = report_params.is_a?(Hash) ? report_params.symbolize_keys.slice(*ALLOWED_UPDATE_FIELDS) : {}
+      @update_params.delete(:file_path) if use_secure_storage?
     end
 
     # 执行报告更新逻辑
@@ -93,6 +94,22 @@ module Reports
     def handle_file_upload(report)
       return { success: true, data: nil, error: nil } if @uploaded_file.blank?
 
+      if use_secure_storage?
+        upload_result = HealthReports::UploadFileService.call(
+          user_id: report.user_id,
+          file: @uploaded_file,
+          existing_file_path: report.file_path
+        )
+        return upload_result unless upload_result[:success]
+
+        data = upload_result[:data]
+        @update_params[:file_path] = data[:file_path]
+        @update_params[:file_size] = data[:file_size]
+        @update_params[:original_filename] = data[:original_filename]
+
+        return { success: true, data: nil, error: nil }
+      end
+
       unless pdf_file?(@uploaded_file)
         return { success: false, data: nil, error: "只支持上传PDF文件" }
       end
@@ -103,7 +120,8 @@ module Reports
 
       FileUtils.mkdir_p(UPLOAD_BASE_DIR) unless Dir.exist?(UPLOAD_BASE_DIR)
 
-      sanitized_name = sanitize_filename(@uploaded_file.original_filename)
+      original_filename = @uploaded_file.original_filename.to_s
+      sanitized_name = sanitize_filename(original_filename)
       timestamp = Time.current.strftime("%Y%m%d%H%M%S")
       stored_name = "#{timestamp}_#{sanitized_name}"
 
@@ -119,6 +137,7 @@ module Reports
 
       @update_params[:file_path] = relative_path
       @update_params[:file_size] = @uploaded_file.size.to_i
+      @update_params[:original_filename] = original_filename
 
       { success: true, data: nil, error: nil }
     rescue StandardError => e
@@ -191,10 +210,20 @@ module Reports
     # @return [Boolean] 是否有效
     def valid_file_path?(file_path)
       return false if file_path.blank?
-      
-      # 检查路径格式和扩展名
-      extension = File.extname(file_path).downcase[1..-1]
-      file_path.match?(/\A\/.+\.(#{ALLOWED_FILE_EXTENSIONS.join('|')})\z/i) && ALLOWED_FILE_EXTENSIONS.include?(extension)
+
+      # 禁止路径遍历
+      return false if file_path.include?("../") || file_path.include?("..\\")
+
+      extension = File.extname(file_path).downcase.delete_prefix(".")
+      return false unless ALLOWED_FILE_EXTENSIONS.include?(extension)
+
+      # 兼容两种格式：
+      # 1. 旧格式：/uploads/reports/xxxx.ext
+      # 2. 新格式：相对路径，例如 user_1/uuid_sanitized.ext
+      legacy_pattern = %r{\A\/uploads\/reports\/.+\.(#{ALLOWED_FILE_EXTENSIONS.join('|')})\z}i
+      new_pattern = /\A[\w\-\u4e00-\u9fa5\/]+\.(#{ALLOWED_FILE_EXTENSIONS.join('|')})\z/i
+
+      file_path.match?(legacy_pattern) || file_path.match?(new_pattern)
     end
 
     # 判断上传文件是否为 PDF
@@ -229,13 +258,18 @@ module Reports
       Rails.logger.warn "Reports::UpdateService delete file warning: #{e.class} - #{e.message}"
     end
 
+    def use_secure_storage?
+      config = Rails.application.config.x.reports_storage
+      config&.mode.to_s == "secure"
+    end
+
     # 序列化报告数据
     # @param report [Report] 报告对象
     # @return [Hash] 序列化后的报告数据
     def serialize_report(report)
       report.as_json(
-        only: [:id, :user_id, :report_type, :status, :file_path, :report_date, 
-               :file_size, :description, :created_at, :updated_at],
+        only: [:id, :user_id, :report_type, :status, :file_path, :report_date,
+               :file_size, :description, :original_filename, :created_at, :updated_at],
         methods: [:active?, :normal_result?, :abnormal?, :abnormal_mild?, 
                  :abnormal_moderate?, :abnormal_severe?, :in_progress?, 
                  :final_result?, :formatted_file_size, :report_age_in_days],

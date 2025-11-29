@@ -102,4 +102,7 @@ Rails.application.configure do
   # ]
   # Skip DNS rebinding protection for the default health check endpoint.
   # config.host_authorization = { exclude: ->(request) { request.path == "/up" } }
+  
+  # 生产环境文件上传配置
+  config.active_storage.replace_on_assign_to_many = false
 end

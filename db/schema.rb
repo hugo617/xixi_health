@@ -10,7 +10,21 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2024_11_26_100000) do
+ActiveRecord::Schema[7.2].define(version: 2024_11_29_012000) do
+  create_table "file_access_logs", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.bigint "user_id"
+    t.bigint "report_id"
+    t.string "file_path", null: false, comment: "访问的报告文件路径"
+    t.string "action", default: "download", null: false, comment: "访问类型，如 download"
+    t.string "ip_address", comment: "访问者IP地址"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["report_id", "created_at"], name: "idx_file_access_logs_report_time"
+    t.index ["report_id"], name: "index_file_access_logs_on_report_id"
+    t.index ["user_id", "created_at"], name: "idx_file_access_logs_user_time"
+    t.index ["user_id"], name: "index_file_access_logs_on_user_id"
+  end
+
   create_table "reports", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.bigint "user_id", null: false, comment: "关联用户ID"
     t.string "report_type", null: false, comment: "报告类型：protein_test, gene_test等"
@@ -22,13 +36,16 @@ ActiveRecord::Schema[7.2].define(version: 2024_11_26_100000) do
     t.datetime "deleted_at", comment: "软删除时间戳"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "original_filename", comment: "用户上传时的原始文件名"
     t.index ["deleted_at"], name: "idx_reports_deleted_at"
     t.index ["file_size"], name: "idx_reports_file_size"
     t.index ["report_date"], name: "idx_reports_date"
     t.index ["report_type"], name: "idx_reports_type"
     t.index ["status"], name: "idx_reports_status"
+    t.index ["user_id", "file_path"], name: "idx_reports_user_file_path"
     t.index ["user_id", "report_type"], name: "idx_reports_user_type"
     t.index ["user_id"], name: "index_reports_on_user_id"
+    t.check_constraint "(`file_path` <> _utf8mb4'') and (not((`file_path` like _utf8mb4'%../%'))) and (not((`file_path` like _utf8mb4'%..\\\\\\\\%'))) and (not((`file_path` like _utf8mb4'http://%'))) and (not((`file_path` like _utf8mb4'https://%')))", name: "chk_reports_file_path_safety"
   end
 
   create_table "users", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
@@ -50,5 +67,7 @@ ActiveRecord::Schema[7.2].define(version: 2024_11_26_100000) do
     t.index ["status"], name: "index_users_on_status"
   end
 
+  add_foreign_key "file_access_logs", "reports"
+  add_foreign_key "file_access_logs", "users"
   add_foreign_key "reports", "users"
 end

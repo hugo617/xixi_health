@@ -131,8 +131,8 @@ module Reports
     def serialize_reports(reports)
       reports.map do |report|
         report.as_json(
-          only: [:id, :user_id, :report_type, :status, :file_path, :report_date, 
-                 :file_size, :description, :created_at, :updated_at],
+          only: [:id, :user_id, :report_type, :status, :file_path, :report_date,
+                 :file_size, :description, :original_filename, :created_at, :updated_at],
           methods: [:active?, :normal_result?, :abnormal?, :abnormal_mild?, 
                    :abnormal_moderate?, :abnormal_severe?, :in_progress?, 
                    :final_result?, :formatted_file_size, :report_age_in_days],

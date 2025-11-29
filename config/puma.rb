@@ -32,3 +32,15 @@ plugin :tmp_restart
 # Specify the PID file. Defaults to tmp/pids/server.pid in development.
 # In other environments, only set the PID file if requested.
 pidfile ENV["PIDFILE"] if ENV["PIDFILE"]
+
+# 文件上传相关配置
+# 设置请求超时时间（大文件上传需要更长时间）
+worker_timeout 300
+
+# 增加请求队列长度，处理大文件上传时的并发
+queue_requests true
+
+# 设置合理的线程数范围（考虑大文件上传需求）
+max_threads_count = ENV.fetch("RAILS_MAX_THREADS", 8)
+min_threads_count = ENV.fetch("RAILS_MIN_THREADS", 2)
+threads min_threads_count, max_threads_count

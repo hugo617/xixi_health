@@ -14,7 +14,8 @@ class ReportsController < ApplicationController
 
     if result[:success]
       @report = result[:data][:report]
-      @file_url = result[:data][:relative_url]
+      # 为了避免直接暴露物理文件路径，预览使用受控的下载路由并设置 inline
+      @file_url = report_download_path(@report, inline: 1)
       @error_message = nil
       render :preview
     else
@@ -36,7 +37,13 @@ class ReportsController < ApplicationController
   # GET /reports/:id/download
   # 报告PDF下载
   def download
-    result = Reports::FileService.call(report_id: params[:id])
+    inline = params[:inline].present?
+    result = HealthReports::DownloadFileService.call(
+      report_id: params[:id],
+      current_user: nil, # 预留：接入登录后可传入 current_user
+      ip_address: request.remote_ip,
+      inline: inline
+    )
 
     if result[:success]
       data = result[:data]
@@ -44,7 +51,7 @@ class ReportsController < ApplicationController
         data[:file_path],
         filename: data[:filename],
         type: data[:content_type],
-        disposition: "attachment"
+        disposition: data[:disposition]
       )
     else
       @report = nil

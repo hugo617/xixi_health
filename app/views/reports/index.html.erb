@@ -1132,7 +1132,7 @@
                 <div class="form-group">
                     <label class="form-label">文件附件 <span class="required-indicator">*</span></label>
                     <input type="file" id="upFile" class="form-input file-input" accept=".pdf,application/pdf" required>
-                    <small class="form-help">仅支持 PDF 文件，最大 10MB</small>
+                    <small class="form-help">仅支持 PDF 文件，最大 200MB</small>
                     <div id="filePreview" class="file-preview" style="display: none;">
                         <div class="file-info">
                             <span id="fileName"></span>
@@ -2277,7 +2277,7 @@
             // 仅支持 PDF
             const isPdfType = file.type === 'application/pdf';
             const isPdfName = file.name.toLowerCase().endsWith('.pdf');
-            const maxSize = 10 * 1024 * 1024; // 10MB
+            const maxSize = 200 * 1024 * 1024; // 200MB
             
             if (!isPdfType && !isPdfName) {
                 showNotification('仅支持上传 PDF 文件', 'error');
@@ -2286,7 +2286,7 @@
             }
             
             if (file.size > maxSize) {
-                showNotification('文件大小不能超过 10MB', 'error');
+                showNotification('文件大小不能超过 200MB', 'error');
                 e.target.value = '';
                 return;
             }

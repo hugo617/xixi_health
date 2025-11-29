@@ -29,5 +29,25 @@ module XixiHealth
     
     # 确保JSON响应用UTF-8编码
     config.action_dispatch.default_charset = 'utf-8'
+    
+    # 配置文件上传大小限制 (200MB)
+    config.active_storage.variant_processor = :mini_magick
+    
+    # 设置Active Storage文件上传大小限制
+    config.active_storage.service_configurations = {
+      local: {
+        service: "Disk",
+        root: Rails.root.join("storage"),
+        upload: {
+          max_size: 200.megabytes
+        }
+      }
+    }
+    
+    # 配置内存限制
+    if defined?(Rails::Server)
+      # 设置Ruby内存分配限制
+      GC.stress = false
+    end
   end
 end

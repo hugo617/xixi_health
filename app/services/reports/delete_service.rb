@@ -84,10 +84,25 @@ module Reports
     # @param file_path [String]
     def delete_file_if_exists(file_path)
       return if file_path.blank?
-      return unless file_path.start_with?("/uploads/reports/")
+      value = file_path.to_s
 
-      absolute_path = Rails.root.join("public", file_path.delete_prefix("/"))
-      File.delete(absolute_path) if File.exist?(absolute_path)
+      # 兼容旧的 public/uploads/reports 目录
+      if value.start_with?("/uploads/reports/")
+        absolute_path = Rails.root.join("public", value.delete_prefix("/"))
+        File.delete(absolute_path) if File.exist?(absolute_path)
+        return
+      end
+
+      # 新的 storage/reports 目录下的文件
+      base_dir = Rails.application.config.x.reports_storage&.base_dir || Rails.root.join("storage", "reports")
+      base = Pathname.new(base_dir)
+      relative = Pathname.new(value)
+      candidate = base.join(relative).cleanpath
+
+      base_real = base.exist? ? base.realpath : base
+      return unless candidate.to_s.start_with?(base_real.to_s)
+
+      File.delete(candidate) if File.exist?(candidate)
     rescue StandardError => e
       Rails.logger.warn "Reports::DeleteService delete file warning: #{e.class} - #{e.message}"
     end

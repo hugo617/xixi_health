@@ -25,13 +25,19 @@ class Report < ApplicationRecord
   # 验证规则
   validates :user_id, presence: true
   validates :report_type, presence: true, inclusion: { in: %w[protein_test gene_test blood_test urine_test other_test] }
-  validates :file_path, presence: true
+  FILE_PATH_REGEX = %r{\A(\/uploads\/reports\/.+|[\w\-\u4e00-\u9fa5\/]+\.[A-Za-z0-9]+)\z}.freeze
+
+  validates :file_path, presence: true, format: {
+    with: FILE_PATH_REGEX,
+    message: "路径格式不正确"
+  }
   validates :status, inclusion: { in: %w[pending_generation under_review normal_result abnormal_mild abnormal_moderate abnormal_severe pending_supplement pending_revision] }
   validates :file_size, numericality: { greater_than_or_equal_to: 0, allow_nil: true }
   
   # 自定义验证
   validate :report_date_cannot_be_in_the_future
   validate :file_size_reasonable
+  validate :file_path_safety
   
   # 作用域
   scope :active, -> { where(deleted_at: nil) }
@@ -205,8 +211,20 @@ class Report < ApplicationRecord
     
     if file_size < 0
       errors.add(:file_size, "不能为负数")
-    elsif file_size > 100.megabytes
-      errors.add(:file_size, "不能超过100MB")
+    elsif file_size > 200.megabytes
+      errors.add(:file_size, "不能超过200MB")
+    end
+  end
+
+  def file_path_safety
+    return if file_path.blank?
+
+    if file_path.include?("../") || file_path.include?("..\\")
+      errors.add(:file_path, "路径包含非法字符")
+    end
+
+    if file_path.start_with?("http://", "https://")
+      errors.add(:file_path, "不支持外部URL")
     end
   end
 end
