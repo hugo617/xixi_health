@@ -1,0 +1,12 @@
+# Railway 数据库配置
+production:
+  adapter: postgresql
+  encoding: unicode
+  database: <%= ENV['DATABASE_NAME'] || 'xixi_health_production' %>
+  pool: <%= ENV.fetch("RAILS_MAX_THREADS", 5) %>
+  timeout: 5000
+  url: <%= ENV['DATABASE_URL'] %>
+  
+  # Railway PostgreSQL 优化
+  prepared_statements: true
+  advisory_locks: true

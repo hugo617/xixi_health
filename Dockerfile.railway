@@ -1,0 +1,45 @@
+# Railway 部署专用 Dockerfile
+FROM ruby:3.3.4-slim
+
+# 安装系统依赖
+RUN apt-get update -qq && \
+    apt-get install --no-install-recommends -y \
+    build-essential \
+    curl \
+    default-libmysqlclient-dev \
+    git \
+    libpq-dev \
+    libvips \
+    pkg-config \
+    python3 \
+    python3-pip \
+    && rm -rf /var/lib/apt/lists /var/cache/apt/archives
+
+# 设置工作目录
+WORKDIR /app
+
+# 安装 Node.js (用于资产编译)
+RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - && \
+    apt-get install -y nodejs
+
+# 复制 Gemfile 和 Gemfile.lock
+COPY Gemfile Gemfile.lock ./
+RUN bundle config set --local deployment 'true' && \
+    bundle config set --local without 'development test' && \
+    bundle install
+
+# 复制应用代码
+COPY . .
+
+# 预编译资产
+RUN RAILS_ENV=production SECRET_KEY_BASE=dummy bundle exec rails assets:precompile
+
+# 暴露端口
+EXPOSE $PORT
+
+# 健康检查
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+  CMD curl -f http://localhost:$PORT/health || exit 1
+
+# 启动应用
+CMD ["bundle", "exec", "rails", "server", "-b", "0.0.0.0", "-p", "$PORT"]

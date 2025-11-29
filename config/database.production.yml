@@ -1,0 +1,49 @@
+# 生产环境数据库配置 - 全球部署优化版本
+# 支持多地域部署和读写分离
+
+default: &default
+  adapter: mysql2
+  encoding: utf8mb4
+  pool: <%= ENV.fetch("RAILS_MAX_THREADS", 20) %>
+  timeout: 5000
+  # 生产环境安全配置
+  username: <%= ENV.fetch("DB_USERNAME", "xixi_health") %>
+  password: <%= ENV.fetch("DB_PASSWORD") %>
+  host: <%= ENV.fetch("DB_HOST", "localhost") %>
+  port: <%= ENV.fetch("DB_PORT", "3306") %>
+  # 全球部署优化参数
+  variables:
+    max_allowed_packet: 209715200  # 200MB
+    net_read_timeout: 300
+    net_write_timeout: 300
+    wait_timeout: 600
+    interactive_timeout: 600
+
+# 主数据库 - 写入操作
+production_primary:
+  <<: *default
+  database: <%= ENV.fetch("DB_NAME", "xixi_health_production") %>
+  host: <%= ENV.fetch("DB_PRIMARY_HOST", ENV.fetch("DB_HOST", "localhost")) %>
+  
+# 只读副本 - 读取操作
+production_replica:
+  <<: *default
+  database: <%= ENV.fetch("DB_NAME", "xixi_health_production") %>
+  host: <%= ENV.fetch("DB_REPLICA_HOST", ENV.fetch("DB_HOST", "localhost")) %>
+  replica: true
+
+# 多地域部署配置
+production_us:
+  <<: *default
+  database: <%= ENV.fetch("DB_NAME", "xixi_health_production") %>_us
+  host: <%= ENV.fetch("DB_US_HOST", ENV.fetch("DB_HOST", "localhost")) %>
+  
+production_eu:
+  <<: *default
+  database: <%= ENV.fetch("DB_NAME", "xixi_health_production") %>_eu
+  host: <%= ENV.fetch("DB_EU_HOST", ENV.fetch("DB_HOST", "localhost")) %>
+  
+production_asia:
+  <<: *default
+  database: <%= ENV.fetch("DB_NAME", "xixi_health_production") %>_asia
+  host: <%= ENV.fetch("DB_ASIA_HOST", ENV.fetch("DB_HOST", "localhost")) %>

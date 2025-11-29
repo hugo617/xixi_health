@@ -1,0 +1,191 @@
+# 全球化部署 Docker Compose 配置
+version: '3.8'
+
+services:
+  # 主应用 - 负载均衡部署
+  app:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    image: xixi-health-global:latest
+    restart: unless-stopped
+    ports:
+      - "3000-3003:3000"
+    environment:
+      - RAILS_ENV=production_global
+      - DATABASE_URL=mysql2://xixi_health:${DB_PASSWORD}@db:3306/xixi_health_production
+      - REDIS_URL=redis://redis:6379/0
+      - SECRET_KEY_BASE=${SECRET_KEY_BASE}
+      - RAILS_MASTER_KEY=${RAILS_MASTER_KEY}
+      - SMTP_ADDRESS=${SMTP_ADDRESS}
+      - SMTP_USERNAME=${SMTP_USERNAME}
+      - SMTP_PASSWORD=${SMTP_PASSWORD}
+      - ASSET_HOST=${ASSET_HOST}
+      - ALLOWED_HOSTS=${ALLOWED_HOSTS}
+    depends_on:
+      - db
+      - redis
+    volumes:
+      - app_storage:/rails/storage
+      - app_logs:/rails/log
+      - app_tmp:/rails/tmp
+    networks:
+      - app_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # 数据库主节点
+  db:
+    image: mysql:8.0
+    restart: unless-stopped
+    environment:
+      - MYSQL_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
+      - MYSQL_DATABASE=xixi_health_production
+      - MYSQL_USER=xixi_health
+      - MYSQL_PASSWORD=${DB_PASSWORD}
+      - MYSQL_MAX_ALLOWED_PACKET=268435456  # 256MB
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./config/mysql/my.cnf:/etc/mysql/conf.d/custom.cnf:ro
+    networks:
+      - app_network
+    command: >
+      --default-authentication-plugin=mysql_native_password
+      --max-allowed-packet=256M
+      --wait-timeout=600
+      --interactive-timeout=600
+      --net-read-timeout=300
+      --net-write-timeout=300
+      --innodb-buffer-pool-size=1G
+      --query-cache-size=128M
+      --query-cache-type=1
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis 缓存和会话存储
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+      - ./config/redis/redis.conf:/usr/local/etc/redis/redis.conf:ro
+    networks:
+      - app_network
+    command: redis-server /usr/local/etc/redis/redis.conf
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+  # Nginx 负载均衡器和反向代理
+  nginx:
+    image: nginx:alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./config/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./config/nginx/sites-available:/etc/nginx/sites-available:ro
+      - ./config/nginx/ssl:/etc/nginx/ssl:ro
+      - nginx_logs:/var/log/nginx
+    depends_on:
+      - app
+    networks:
+      - app_network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # 背景任务处理
+  sidekiq:
+    build: .
+    command: bundle exec sidekiq
+    restart: unless-stopped
+    depends_on:
+      - db
+      - redis
+    environment:
+      - RAILS_ENV=production_global
+      - DATABASE_URL=mysql2://xixi_health:${DB_PASSWORD}@db:3306/xixi_health_production
+      - REDIS_URL=redis://redis:6379/0
+    volumes:
+      - app_storage:/rails/storage
+    networks:
+      - app_network
+
+  # 日志收集器
+  fluentd:
+    image: fluent/fluentd:latest
+    restart: unless-stopped
+    volumes:
+      - ./config/fluentd/fluent.conf:/fluentd/etc/fluent.conf:ro
+      - nginx_logs:/var/log/nginx:ro
+      - app_logs:/rails/log:ro
+    networks:
+      - app_network
+
+  # 监控 - Prometheus
+  prometheus:
+    image: prom/prometheus:latest
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./config/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    networks:
+      - app_network
+
+  # 监控 - Grafana
+  grafana:
+    image: grafana/grafana:latest
+    restart: unless-stopped
+    ports:
+      - "3001:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./config/grafana/provisioning:/etc/grafana/provisioning:ro
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD}
+    networks:
+      - app_network
+
+volumes:
+  db_data:
+    driver: local
+  redis_data:
+    driver: local
+  app_storage:
+    driver: local
+  app_logs:
+    driver: local
+  app_tmp:
+    driver: local
+  nginx_logs:
+    driver: local
+  prometheus_data:
+    driver: local
+  grafana_data:
+    driver: local
+
+networks:
+  app_network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
